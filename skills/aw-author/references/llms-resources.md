@@ -29,42 +29,57 @@ External documentation resources from the official gh-aw documentation site, opt
 - **URL:** https://github.github.com/gh-aw/_llms-txt/agentic-workflows.txt
 - **Purpose:** Comprehensive blog series documenting workflow patterns, best practices, and real-world examples from Peli de Halleux's Agent Factory
 - **When to use:**
-  - When users want real-world pattern inspiration
-  - When exploring production workflow examples
-  - When understanding orchestration patterns in practice
-  - When learning from the 100+ production workflows in the Agent Factory
-- **Content covers:** Orchestration patterns (TaskOps, Causal Chains, Direct Dispatch), production metrics (merge rates, attribution), anti-patterns learned from real deployments
+  - When users need production-tested patterns
+  - When looking for creative workflow ideas
+  - When needing more than 100 annotated workflow examples
+- **Content covers:** Pattern catalogs, security hardening, multi-agent orchestration, engine comparisons
 
 ---
 
-## Usage Guidance
+## Reference Pages
 
-### When to Fetch External Resources
+### Tools Reference
+- **URL:** https://github.github.com/gh-aw/reference/tools/
+- **Purpose:** Complete tool configuration reference
+- **When to use:** Verifying tool syntax, discovering new tool parameters
 
-1. **User asks about latest features:** The embedded schema may lag behind the official spec. Fetch `llms-full.txt` to check.
-2. **Edge case not covered locally:** If `frontmatter-schema.md` doesn't document a specific key or behavior, fetch the full spec.
-3. **Real-world examples needed:** Fetch `agentic-workflows.txt` for production patterns from the Agent Factory (100+ workflows).
-4. **Validation disputes:** When unsure if a configuration is valid, the full spec is the authoritative source.
-
-### How to Cross-Reference
-
-The embedded reference files in this plugin (`frontmatter-schema.md`, etc.) are derived from these external resources. When updating the embedded references:
-1. Fetch `llms-full.txt` for the latest spec
-2. Compare against the embedded schema
-3. Update embedded references to match
-
-### Fetching Example
-
-Use WebFetch to retrieve these resources:
-```
-WebFetch: https://github.github.com/gh-aw/llms-full.txt
-Prompt: "Extract the specification for the {specific_key} frontmatter field"
-```
+### Safe-Outputs Reference
+- **URL:** https://github.github.com/gh-aw/reference/safe-outputs/
+- **Purpose:** Complete safe-output types and constraint reference
+- **When to use:** Configuring write operations, understanding constraint options
 
 ---
 
-## Additional Resources
+## Setup & Guides
 
-- **Source Repository:** https://github.com/github/gh-aw — Source code, issues, and development resources
-- **GitHub CLI Documentation:** https://cli.github.com/manual/ — Reference for the underlying CLI tool
-- **GitHub Actions Documentation:** https://docs.github.com/en/actions — Understanding the Actions runtime that gh-aw compiles to
+### Creating Workflows
+- **URL:** https://github.github.com/gh-aw/setup/creating-workflows/
+- **Purpose:** Step-by-step guide for creating gh-aw workflows
+- **When to use:** Helping users get started, understanding the creation flow
+
+### Create Prompt
+- **URL:** https://raw.githubusercontent.com/github/gh-aw/main/create.md
+- **Purpose:** The official creation prompt used by coding agents to generate workflows
+- **When to use:** Understanding the official authoring approach, generating workflows
+
+---
+
+## Source Repository
+
+### Example Workflows
+- **URL:** https://github.com/github/gh-aw/tree/main/.github/workflows
+- **Purpose:** Working example workflows from the gh-aw repository itself
+- **When to use:** Seeing production-quality workflow files, learning patterns by example
+
+---
+
+## Fetching Strategy
+
+1. **Start with embedded references** — the files in this `references/` directory cover most use cases
+2. **Fetch `llms-small.txt`** for quick lookups not covered by embedded references
+3. **Fetch `llms-full.txt`** only when:
+   - Embedded references are insufficient
+   - User asks about a specific spec detail
+   - Validating against the authoritative source
+4. **Fetch `agentic-workflows.txt`** for production patterns and real-world examples
+5. **Fetch specific reference pages** (tools, safe-outputs) for detailed configuration questions

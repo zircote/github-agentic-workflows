@@ -38,7 +38,5 @@ Load the **aw-author** skill to handle the request. The skill will:
 
 1. Parse the argument to determine the mode (new, generate, validate, improve, debug, or query)
 2. If no argument provided, prompt the user to select a mode
-3. Route to the appropriate workflow within the skill
-4. Use progressive disclosure — load reference files only as needed
-
-For deep workflow analysis (multi-file review, cross-workflow dependencies, security audit), delegate to the **aw-analyst** agent.
+3. Execute the selected mode following the skill's guided flow
+4. Reference the embedded spec materials in `references/` for accuracy

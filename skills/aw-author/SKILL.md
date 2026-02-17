@@ -47,16 +47,16 @@ AskUserQuestion: "What should this workflow do?"
 
 AskUserQuestion: "What triggers this workflow?"
 Options:
-  - "New/updated issues" → on.issue
+  - "New/updated issues" → on.issues
   - "New/updated pull requests" → on.pull_request
-  - "Issue comments (slash commands)" → on.issue_comment
+  - "Issue/PR comments (slash commands)" → on.issue_comment
   - "Scheduled (cron/daily)" → on.schedule
   - "Manual dispatch" → on.workflow_dispatch
   - "Push to branch" → on.push
   - "Discussion events" → on.discussion
 ```
 
-For event-triggered workflows (issues, PRs, comments, discussions), always include `reaction: eyes` in the `on:` block. This is required for the compiler to grant permissions to `pre_activation`.
+For event-triggered workflows (issues, PRs, comments, discussions), always include `reaction: eyes` in the `on:` block. This grants the compiler permissions for `pre_activation`.
 
 ### Phase 2: Engine Selection
 
@@ -75,118 +75,179 @@ Configure engine settings: `max-turns`, `timeout-minutes`, `thinking`.
 ```
 AskUserQuestion: "Which tools does the workflow need?" (multi-select)
 Options:
-  - "GitHub (issues, PRs, labels, discussions)"
-  - "Bash (shell commands)"
-  - "File editing"
-  - "Web fetch (HTTP requests)"
-  - "Web search"
-  - "Playwright (browser automation)"
-  - "Cache memory (persistent state)"
-  - "Repo memory (cross-workflow state)"
-  - "MCP servers (custom integrations)"
+  - "GitHub (issues, PRs, labels, discussions)" → tools.github
+  - "Bash (shell commands)" → tools.bash
+  - "File editing" → tools.edit
+  - "Web fetch / search" → tools.web-fetch, tools.web-search
+  - "Browser automation (Playwright)" → tools.playwright
+  - "Memory (cache/repo)" → tools.cache-memory, tools.repo-memory
 ```
 
-For each selected tool, configure relevant sub-options (e.g., GitHub toolsets, bash command arrays).
+For GitHub tools, narrow toolsets to the minimum needed. Refer to `references/tools-reference.md` for the complete list.
 
-If the user wants to add a Docker-based MCP server, **always** use the `container` field:
+Default GitHub toolsets in Actions: `[context, repos, issues, pull_requests]`.
+
+For bash, prefer an explicit allowlist over `:*`:
 ```yaml
-my-server:
-  container: "ghcr.io/org/image"
-  args: ["subcommand"]
+bash: ["echo", "ls", "cat", "grep", "jq", "git:*"]
 ```
-**NEVER** generate `command: docker` with `args: ["run", ...]` — this causes the compiler to misparse args as image names, breaking the `download_docker_images` step at runtime.
 
-### Phase 4: Safe Outputs
+### Phase 4: Safe-Outputs Selection
 
 ```
-AskUserQuestion: "What GitHub operations should the workflow perform?" (multi-select)
+AskUserQuestion: "What write operations should the workflow perform?" (multi-select)
 Options:
-  - "Add labels to issues/PRs"
-  - "Post comments"
-  - "Create issues"
-  - "Create pull requests"
-  - "Close issues"
-  - "Create discussions"
-  - "Add reactions"
+  - "Add labels to issues/PRs" → add-labels
+  - "Add comments" → add-comment
+  - "Create new issues" → create-issue
+  - "Create pull requests" → create-pull-request
+  - "Close issues" → close-issue
+  - "Assign users" → assign-to-user
+  - "Dispatch other workflows" → dispatch-workflow
+  - "None (read-only)" → no safe-outputs
 ```
 
-For each selected operation, configure constraints (allowlists, prefixes, draft mode, etc.).
+For each selected safe-output, prompt for constraints:
+- **add-labels:** "Which labels are allowed?" → `allowed: [list]`
+- **create-issue:** "Title prefix? Auto-close older?" → `title-prefix`, `close-older-issues`
+- **add-comment:** "Hide older comments?" → `hide-older-comments: true`
+- **create-pull-request:** "Draft mode? Reviewers?" → `draft: true`, `reviewers: [list]`
 
-### Phase 5: Security & Network
+Refer to `references/safe-outputs.md` for the full catalog of safe-output types and parameters.
+
+### Phase 5: Security & Permissions
+
+Derive minimal permissions from the selected tools and safe-outputs:
+
+| Component | Required Permission |
+|-----------|-------------------|
+| Read issues | `issues: read` |
+| Add labels / comments / close | `issues: write` |
+| Read PRs | `pull-requests: read` |
+| Create/update PRs | `pull-requests: write` |
+| Push to PR branch | `contents: write` |
+| Read code / files | `contents: read` |
+| Discussions | `discussions: read` or `write` |
+| Code scanning | `security-events: write` |
+| Dispatch workflows | `actions: write` |
+| Workflow introspection | `actions: read` |
+
+Ask about security posture:
 
 ```
-AskUserQuestion: "What's the security posture?"
+AskUserQuestion: "Is this repository public or private?"
 Options:
-  - "Default (strict mode, ecosystem-only network)" → strict: true, firewall: true
-  - "Public repo triage (strict disabled)" → strict: false
-  - "Custom network rules" → strict: false, configure allowed/blocked domains
+  - "Private" → lockdown not needed
+  - "Public" → recommend strict: false for external input, lockdown considerations
 ```
 
-**Network rules:** Always include `defaults` in `network.allowed` — it covers the internal proxy endpoints the GitHub MCP server requires. Raw domains like `"api.github.com"` are insufficient. Use `containers` for Docker-based MCP tools. Only add raw custom domains for non-GitHub services.
+For public repos processing external input (issues from non-contributors), set `strict: false` and consider `lockdown` settings. Refer to `references/validation.md` for security guidance.
 
-**Bash allowlist:** For event-triggered workflows, always include `cat` and `jq` so the agent can read `event.json` as a fallback when MCP data access fails.
+### Phase 6: Network Configuration
 
-### Phase 6: Prose Body
+```
+AskUserQuestion: "Does this workflow need external network access?"
+Options:
+  - "No (sandboxed)" → omit network block
+  - "Yes, specific domains" → network.firewall with allowed domains
+  - "Yes, unrestricted" → network: true (discouraged)
+```
 
-Guide the user through writing the markdown body sections:
-1. H1 title and mission statement
-2. Context section (repo, trigger, constraints)
-3. Steps section (ordered instructions)
-4. Rules section (hard constraints)
-5. Output format section (comment/issue templates)
-6. Edge cases section
+If specific domains, prompt for the list:
+```yaml
+network:
+  firewall:
+    allowed:
+      - "api.example.com"
+```
 
-### Phase 7: Assembly & Review
+### Phase 7: Prose Body
 
-Assemble the complete workflow file. Present it to the user for review.
-Offer to save it to a specified path.
+Guide the user through writing the markdown body. Follow the structure in `references/markdown-body.md`:
 
-Reference `references/frontmatter-schema.md` for all frontmatter field details.
-Reference `references/markdown-body.md` for prose body best practices.
+1. **H1 heading** — workflow title / mission statement
+2. **Context section** — repository context, event payload, environment
+3. **Instructions section** — step-by-step agent behavior
+4. **Edge cases** — error handling, fallback behavior
+5. **Output formatting** — how results should look
+
+Use expression syntax for dynamic values:
+- `${{ github.repository }}` — repo name
+- `${{ github.event }}` — trigger event payload
+- `${{ secrets.NAME }}` — secret references
+- `${{ vars.NAME }}` — variable references
+
+### Phase 8: Assembly & Compilation
+
+1. Assemble the complete workflow file combining frontmatter + prose body
+2. Write to `.github/workflows/<name>.md`
+3. Remind the user to compile: `gh aw compile`
+4. Validate the output against `references/validation.md`
 
 ---
 
 ## Generate Mode (One-Shot)
 
-Collect all requirements in a single structured prompt, then generate the complete workflow file.
+Given a description, produce a complete workflow file in one step.
 
-1. Ask the user to describe the workflow in detail: purpose, trigger, tools needed, outputs expected
-2. Generate the complete frontmatter based on the description
-   - For Docker-based MCP tools, **always** use `container` field — never `command: docker`
-3. Generate the prose body following best practices from `references/markdown-body.md`
-4. Present the complete file
-5. Offer iterative refinement
+1. Parse the user's description for: purpose, trigger, engine, tools, safe-outputs
+2. Infer sensible defaults for anything unspecified
+3. Generate the complete workflow file with annotated frontmatter
+4. Present the file and explain key decisions
+5. Offer to iterate on any section
+
+Use the full spec knowledge from reference files to make informed defaults:
+- Default engine: `copilot`
+- Default timeout: 10 minutes for simple, 30 for complex
+- Always minimize permissions
+- Always constrain safe-outputs with allowlists
 
 ---
 
 ## Validate Mode
 
-Validate an existing workflow file against the spec.
+Validate an existing workflow file against the gh-aw specification.
 
-1. Read the workflow file (ask for path or accept pasted content)
-2. **Frontmatter validation:**
-   - Check all keys against `references/frontmatter-schema.md`
-   - Verify required fields are present (`on` trigger)
-   - Check types and values (integers, valid event types, valid permission levels)
-   - Check `safe-outputs` operations are properly constrained
-   - Verify `permissions` match what `tools` and `safe-outputs` require
-   - **MCP tool definitions** (CRITICAL): Check every custom tool entry under `tools:` for the `command: docker` anti-pattern. Any tool using `command: docker` with `args: ["run", ...]` MUST be rewritten to use the `container` field instead. The compiler cannot parse Docker image references from raw `docker run` args — it extracts non-image tokens (subcommands, flags) as container names, causing `download_docker_images` pull failures at runtime. Flag this as a **Critical** finding.
-   - **Network `defaults` alias** (CRITICAL): If `network.allowed` lists raw domains (e.g., `"api.github.com"`) instead of the `defaults` ecosystem alias, the GitHub MCP server will fail with `fetch failed` — raw domains don't cover internal Docker proxy endpoints. `defaults` must always be present. Flag missing `defaults` as **Critical**.
-   - **Bash allowlist for event data** (WARNING): For event-triggered workflows (issues, PRs, comments), verify `bash` includes `cat` and `jq` so the agent can read `event.json` as a fallback when MCP calls fail. Flag as **Warning** if missing.
-   - **Missing `reaction:` field** (CRITICAL): For event-triggered workflows, verify the `on:` block includes `reaction:` (e.g., `reaction: eyes`). Without it, the compiler generates `pre_activation` with no permissions, causing `Bad credentials` on the membership check and skipping all subsequent jobs. Flag as **Critical**.
-3. **Body validation:**
-   - Check for H1 heading
-   - Check for hardcoded values that should use `${{ }}` templating
-   - **Explicit MCP tool names** (WARNING): Check for references to specific MCP tool function names (e.g., `get_issue`, `create_pull_request`, `issue_read`). The prose body should use natural language instructions — the agent maps these to available tools automatically. Hardcoded tool names may not match the registered tool names, causing `fetch failed` errors. Flag as **Warning**.
-   - Check for vague instructions
-   - Check for missing edge case handling
-4. **Cross-reference validation:**
-   - Labels in body instructions match `safe-outputs.add-labels.allowed`
-   - Tools referenced in body are declared in `tools` block
-   - Permissions match actual usage
-5. Report findings as: Critical (must fix), Warning (should fix), Suggestion (nice to have)
+### Validation Checklist
 
-Reference `references/validation.md` for the complete checklist.
+Run through these checks in order:
+
+1. **YAML syntax** — valid frontmatter delimiters, correct indentation, proper types
+2. **Required fields** — `on` trigger must be present
+3. **Trigger validity** — event types match gh-aw schema (`issues` not `issue`, correct `types` values)
+4. **Permission scoping** — permissions are sufficient for declared tools and safe-outputs, no unnecessary `write`
+5. **Tool configuration** — toolsets exist, bash allowlist is appropriate, no contradictions
+6. **Safe-output consistency** — every write operation in the prose has a matching safe-output declaration
+7. **Safe-output constraints** — allowlists are populated, `max` limits are set, `title-prefix` for created items
+8. **Cross-references** — tools match permissions, safe-outputs match permissions, prose matches both
+9. **Security posture** — `strict` mode appropriate, `lockdown` considered for public repos, secrets not hardcoded
+10. **Body structure** — H1 present, context section, clear instructions, edge cases handled
+11. **Expression syntax** — `${{ }}` expressions are valid, secrets referenced correctly
+12. **Anti-patterns** — check against `references/validation.md` known issues
+
+### Output Format
+
+Present findings as a scored report:
+
+```
+## Validation Report
+
+**Overall:** 8/10
+
+### Critical Issues (must fix)
+- [ ] Issue description
+
+### Warnings (should fix)
+- [ ] Warning description
+
+### Suggestions (nice to have)
+- [ ] Suggestion description
+
+### Passed Checks
+- [x] Check description
+```
+
+Refer to `references/validation.md` for the complete error catalog.
 
 ---
 
@@ -194,73 +255,105 @@ Reference `references/validation.md` for the complete checklist.
 
 Analyze an existing workflow and suggest improvements.
 
-1. Read the workflow file
-2. **Gap analysis:**
-   - Missing frontmatter fields that would improve the workflow
-   - Missing safe-output constraints (e.g., no `title-prefix` or `allowed` lists)
-   - Over-permissioned declarations
-   - Missing edge cases in prose body
-3. **Pattern matching:**
-   - Compare against orchestration patterns in `references/orchestration.md`
-   - Suggest appropriate patterns based on workflow complexity
-   - Identify opportunities for multi-phase or causal chain patterns
-4. **Quality scoring:**
-   - Completeness (0-100): Are all relevant fields configured?
-   - Security (0-100): Follows least-privilege, proper constraints?
-   - Clarity (0-100): Instructions clear, specific, well-structured?
-   - Robustness (0-100): Edge cases handled, failure modes addressed?
-5. Present improvement suggestions ranked by impact
+### Analysis Dimensions
+
+1. **Completeness** — missing fields, undeclared operations, incomplete prose
+2. **Security** — permission over-scoping, missing constraints, lockdown gaps
+3. **Robustness** — edge case handling, timeout configuration, error scenarios
+4. **Clarity** — prose quality, section structure, naming consistency
+5. **Patterns** — match against orchestration patterns in `references/orchestration.md`
+
+### Output Format
+
+```
+## Improvement Analysis
+
+**Current Pattern:** [detected pattern name]
+**Recommended Pattern:** [if different]
+
+### Priority Improvements
+1. [Description] — [Why it matters]
+
+### Optional Enhancements
+1. [Description] — [Benefit]
+
+### Suggested Rewrite
+[Show specific frontmatter or prose changes as diffs]
+```
 
 ---
 
 ## Debug Mode
 
-Diagnose issues with a failing or misbehaving workflow.
+Diagnose failing workflows.
 
-1. Gather context:
-   - Read the workflow file
-   - Ask for error messages, logs, or observed behavior
-2. **Compilation debugging:**
-   - Check for YAML syntax errors
-   - Check for strict mode violations
-   - Check for trigger conflicts
-3. **Runtime debugging:**
-   - Check for missing secrets
-   - Check for network/firewall blocks
-   - Check for permission insufficiency
-   - Check for timeout issues
-   - Check for context window exhaustion patterns
-   - **Docker image pull failures**: If the error mentions `pull access denied` or `repository does not exist` in the `Download container images` step, check for `command: docker` in MCP tool definitions — the compiler misparsed args as image names. Fix by converting to `container` field.
-4. **Behavioral debugging:**
-   - Compare intended behavior (from prose) with actual behavior
-   - Check for instruction ambiguity
-   - Check safe-output constraints that might be blocking intended operations
-5. Provide specific fix recommendations with corrected YAML/markdown
+### Diagnostic Flow
 
-Reference `references/validation.md` for common failure patterns.
+1. **Identify failure phase:**
+   - Compilation error → frontmatter/syntax issues
+   - Runtime error → tool/permission/timeout issues
+   - Behavioral error → prose/logic issues
+
+2. **For compilation errors:**
+   - Check YAML syntax
+   - Check field names against schema in `references/frontmatter-schema.md`
+   - Check trigger configuration
+   - Check safe-output references
+
+3. **For runtime errors:**
+   - Check permissions match actual tool usage
+   - Check timeout is sufficient
+   - Check network access if external calls needed
+   - Check safe-output constraints aren't too restrictive
+
+4. **For behavioral errors:**
+   - Review prose instructions for ambiguity
+   - Check if the agent has sufficient context
+   - Check tool selection matches the task
+   - Review safe-output allowlists for missing values
+
+Ask the user to provide:
+- The workflow file
+- Error messages or logs (from GitHub Actions)
+- Expected vs actual behavior
+
+Use `references/validation.md` for the error catalog and common fixes.
 
 ---
 
 ## Query Mode
 
-Answer questions about gh-aw capabilities, syntax, or best practices.
+Answer questions about gh-aw capabilities.
 
-- Use embedded references first (`references/frontmatter-schema.md`, etc.)
-- For questions not covered by embedded references, suggest fetching from `references/llms-resources.md` URLs
-- Provide code examples from `references/examples.md` when relevant
-- Reference `references/orchestration.md` for pattern questions
+For questions about:
+- **Frontmatter fields** → refer to `references/frontmatter-schema.md`
+- **Tool configuration** → refer to `references/tools-reference.md`
+- **Safe-outputs** → refer to `references/safe-outputs.md`
+- **Workflow patterns** → refer to `references/orchestration.md`
+- **Body writing** → refer to `references/markdown-body.md`
+- **Errors and debugging** → refer to `references/validation.md`
+- **Examples** → refer to `references/examples.md`
+
+For questions not covered by embedded references, fetch the latest spec:
+- Full spec: `https://github.github.com/gh-aw/llms-full.txt`
+- Production patterns: `https://github.github.com/gh-aw/_llms-txt/agentic-workflows.txt`
+
+See `references/llms-resources.md` for the complete list of fetchable resources.
 
 ---
 
-## Reference Files
+## Critical Rules
 
-For detailed specifications, load these reference files as needed (progressive disclosure):
+These rules apply across ALL modes:
 
-| Reference | When to Load |
-|-----------|-------------|
-| `references/frontmatter-schema.md` | Authoring frontmatter, validating keys, answering schema questions |
-| `references/markdown-body.md` | Writing prose body, reviewing instructions, answering body questions |
-| `references/orchestration.md` | Choosing workflow patterns, multi-agent design, complex workflows |
-| `references/validation.md` | Validating workflows, debugging errors, pre-deployment checks |
-| `references/examples.md` | Providing examples, showing patterns in action |
-| `references/llms-resources.md` | Fetching latest spec, real-world patterns, updating embedded references |
+1. **Trigger field is `issues` (plural), not `issue`** — this is the most common mistake
+2. **Event-triggered workflows need `reaction: eyes`** in the `on:` block for pre_activation permissions
+3. **Safe-outputs are the ONLY way to write** — the agent itself is read-only
+4. **Permissions must match** — every safe-output type requires specific permission scopes
+5. **`strict: false` is required** when processing untrusted/external input (public repo issues)
+6. **Bash defaults are safe** — only `echo`, `ls`, `pwd`, `cat`, `head`, `tail`, `grep`, `wc`, `sort`, `uniq`, `date`
+7. **GitHub toolsets default** to `[context, repos, issues, pull_requests]` in Actions
+8. **MCP server `container:` field** is for Docker image references, not arbitrary strings
+9. **All workflow-created items** include a hidden `<!-- gh-aw-workflow-id: NAME -->` marker
+10. **`read-all` permission shorthand** expands to read on all permission scopes
+11. **`event.json` fallback** — when `${{ github.event }}` is unavailable, agents should check for `event.json` in the workspace

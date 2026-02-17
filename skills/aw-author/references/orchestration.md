@@ -2,27 +2,31 @@
 
 gh-aw workflows can be orchestrated in various patterns depending on complexity. Each pattern has different tradeoffs for coordination, traceability, and resource usage.
 
+---
+
 ## 1. Direct Dispatch
 
 **The simplest pattern.** A single workflow responds to a single event and performs a single task.
 
 **Use when:** The task is self-contained, requires no coordination, and produces one type of output.
 
+### Characteristics
+- One trigger → one agent → one output type
+- Minimal frontmatter complexity
+- Easy to debug and maintain
+
 ### Frontmatter Responsibility
 - Define the trigger event
 - Declare minimal permissions
 - Constrain safe-outputs to one operation type
 
-### Prose Responsibility
-- Complete instruction set for the single task
-- Edge case handling
-- Output formatting
-
 ### Example: Issue Labeler
+
 ```yaml
 on:
   issues:
     types: [opened]
+    reaction: eyes
 permissions:
   issues: read
 tools:
@@ -30,219 +34,274 @@ tools:
     toolsets: [issues, labels]
 safe-outputs:
   add-labels:
-    allowed: [bug, feature, enhancement]
-  add-comment: {}
-```
-
-```markdown
-# Label New Issues
-
-Read the issue title and body. Classify as bug, feature, or enhancement.
-Add the appropriate label. Comment with brief reasoning.
+    allowed: [bug, feature, enhancement, documentation]
 ```
 
 ---
 
-## 2. Multi-Phase / TaskOps
+## 2. Fan-Out (Event-Driven Pipeline)
 
-**Sequential multi-agent collaboration.** Multiple workflows operate in phases, each building on the previous phase's output.
+**Multiple workflows triggered by the same event.** Each handles a different aspect independently.
 
-**Use when:** The task is too complex for one agent, requires different capabilities per phase, or benefits from human review between phases.
+**Use when:** An event requires multiple independent analyses or actions (e.g., new issue needs triage, assignment, and notification).
 
-### Phase Architecture
+### Characteristics
+- Same trigger → multiple independent workflows
+- No coordination needed between workflows
+- Each workflow has its own permissions and safe-outputs
+- Workflows run in parallel
 
-```
-Phase 1: Discovery    -> Creates discussions/issues with analysis
-Phase 2: Planning     -> Extracts tasks from Phase 1 output into actionable issues
-Phase 3: Execution    -> Coding agents address individual issues, create PRs
-Phase 4: Attribution  -> Causal chains track provenance from discussion -> issue -> PR
-```
+### Design Guidelines
+- Each workflow should have a single responsibility
+- Avoid overlapping safe-outputs (label conflicts)
+- Use distinct `title-prefix` values per workflow
+- Keep permissions isolated per workflow
 
-### Frontmatter Responsibility (per phase)
-- Each phase is a separate workflow file
-- Phase 2+ triggers on output of previous phase (e.g., `discussion.commented`, `issue.opened`)
-- Permissions escalate per phase (discovery=read, execution=write)
+### Example: New Issue Fan-Out
 
-### Prose Responsibility (per phase)
-- Phase 1: Analysis and structured output generation
-- Phase 2: Parsing previous output, decomposing into sub-tasks
-- Phase 3: Implementation instructions referencing the originating issue
-- Phase 4: Link attribution (referencing upstream discussions/issues)
-
-### Example: Code Review Pipeline
-
-**Phase 1 -- Analysis (discovery.md):**
+**Workflow 1: Triage**
 ```yaml
 on:
-  schedule:
-    - cron: "0 2 * * *"
-permissions:
-  contents: read
-  discussions: read
-tools:
-  github:
-    toolsets: [issues, discussions]
-  serena: null
+  issues:
+    types: [opened]
+    reaction: eyes
 safe-outputs:
-  create-discussion:
-    category: "Code Review"
+  add-labels:
+    allowed: [bug, feature, enhancement]
 ```
 
-**Phase 2 -- Task Extraction (plan-command.md):**
+**Workflow 2: Assignment**
+```yaml
+on:
+  issues:
+    types: [opened]
+    reaction: eyes
+safe-outputs:
+  assign-to-user:
+    max: 1
+```
+
+**Workflow 3: Welcome**
+```yaml
+on:
+  issues:
+    types: [opened]
+    reaction: eyes
+safe-outputs:
+  add-comment:
+    max: 1
+```
+
+---
+
+## 3. Pipeline (Sequential Dispatch)
+
+**One workflow triggers another.** Results from the first inform the second.
+
+**Use when:** Tasks have dependencies — e.g., analyze first, then act based on analysis.
+
+### Characteristics
+- Workflow A completes → dispatches Workflow B
+- Pass context via issue comments, labels, or cache-memory
+- Clear ordering and dependency chain
+
+### Implementation
+
+```yaml
+# Workflow A: Analyzer
+safe-outputs:
+  add-labels:
+    allowed: [needs-fix, needs-review, ok]
+  dispatch-workflow:
+    workflows: ["auto-fixer.yml"]
+    max: 1
+```
+
+```yaml
+# Workflow B: Auto-Fixer (dispatched)
+on:
+  workflow_dispatch:
+```
+
+### Context Passing Methods
+1. **Labels:** Workflow A adds labels → Workflow B reads them
+2. **Comments:** Workflow A posts analysis → Workflow B reads comments
+3. **Cache memory:** Workflow A writes to cache → Workflow B reads from cache
+4. **Issue body:** Workflow A updates issue body → Workflow B parses it
+
+---
+
+## 4. ChatOps (Command-Driven)
+
+**Slash commands in issue/PR comments trigger workflows.** Users type `/command` to invoke.
+
+**Use when:** Human-in-the-loop workflows where users request specific actions.
+
+### Characteristics
+- Triggered by `issue_comment` with command parsing
+- Human initiates, agent executes
+- Great for on-demand tasks: `/triage`, `/plan`, `/security`, `/review`
+
+### Implementation
+
 ```yaml
 on:
   issue_comment:
     types: [created]
-  # Triggers on /plan command
-permissions:
-  issues: read
-  discussions: read
-safe-outputs:
-  create-issue:
-    title-prefix: "[refactor]"
-    labels: [automated, refactor]
+    reaction: eyes
 ```
 
----
+### Prose Body for Command Parsing
 
-## 3. Causal Chains
-
-**Explicit traceability through GitHub linking.** Every downstream artifact references its upstream source.
-
-**Use when:** Auditability matters, you need to trace why a PR was created, or multiple teams need visibility into the automation pipeline.
-
-### Chain Structure
-
-```
-Discussion #123 (analysis)
-  -> Comment: /plan
-    -> Issue #456 (task)
-      -> PR #789 (implementation)
-        -> References: "Fixes #456, originated from Discussion #123"
-```
-
-### Frontmatter Responsibility
-- Each workflow declares which GitHub objects it reads from and writes to
-- Safe-outputs include linking fields (labels, title-prefixes) for traceability
-
-### Prose Responsibility
-- Explicit instructions to include references: "In the PR body, include `Originated from Discussion #X`"
-- Instructions to read upstream context: "Read the parent issue body for requirements"
-- Attribution patterns: "When creating an issue from a discussion, reference the discussion number"
-
-### Best Practices
-- Use consistent title prefixes (`[refactor]`, `[perf]`, `[audit]`) for filtering
-- Always close upstream issues when downstream work merges
-- Include the full chain in PR descriptions for reviewers
-
----
-
-## 4. Conditional Execution
-
-**Dynamic routing based on event context.** A single workflow entry point routes to different behaviors based on conditions.
-
-**Use when:** The same trigger event requires different handling depending on content, labels, or author.
-
-### Frontmatter Responsibility
-- Single trigger definition covering all cases
-- Tools and permissions for all possible paths (union of requirements)
-- Safe-outputs covering all possible output types
-
-### Prose Responsibility
-- Conditional logic: "If the issue has label X, do A. If label Y, do B."
-- Fallback behavior: "If none of the above conditions match, add `needs-triage` label"
-- Guard clauses: "If the author is a bot, skip processing entirely"
-
-### Example
 ```markdown
-# Issue Router
+## Command Detection
 
-Read the incoming issue.
+Check the triggering comment for slash commands:
+- `/triage` — Classify and label this issue
+- `/plan` — Create an implementation plan
+- `/security` — Run security analysis
+- `/help` — Show available commands
 
-## Routing Rules
-
-**If** the issue title starts with `[bug]` or has the `bug` label:
-- Run the bug triage checklist
-- Check for reproduction steps
-- Assign severity label (critical, high, medium, low)
-
-**If** the issue title starts with `[feature]` or has the `enhancement` label:
-- Summarize the feature request
-- Check for duplicates among open issues
-- Add `feature-request` label
-
-**If** the issue is from a first-time contributor:
-- Welcome them with a friendly comment
-- Add `first-contribution` label
-
-**Otherwise:**
-- Add `needs-triage` label
-- Comment asking for clarification
+If the comment doesn't start with a recognized command, ignore it.
 ```
 
----
+### Multi-Command Pattern
 
-## 5. Recursive Scheduling
-
-**Self-perpetuating workflows with state.** A workflow runs on a schedule, maintains state across runs, and adjusts its behavior based on accumulated history.
-
-**Use when:** Long-running improvement campaigns, iterative analysis, or progressive codebase audits that need to cover different areas over time.
-
-### Frontmatter Responsibility
-- Schedule trigger (cron or natural language)
-- `cache-memory` or `repo-memory` tool enabled for state persistence
-- Rate limiting to control resource usage
-
-### Prose Responsibility
-- State reading: "Check cache-memory for `last-processed` to determine where to resume"
-- Coverage rotation: "Use a selection algorithm: 60% recent, 30% rotation, 10% revisit"
-- Termination conditions: "If all items have been processed in the last 7 days, skip this run"
-- State writing: "Update `last-processed` with the current batch"
-
-### Example: Progressive Codebase Audit
 ```yaml
 on:
-  schedule:
-    - cron: "0 9 * * 1-5"
+  issue_comment:
+    types: [created]
+    reaction: eyes
+permissions:
+  issues: read
+  contents: read
 tools:
-  cache-memory: null
   github:
-    toolsets: [issues]
+    toolsets: [issues, labels, repos]
 safe-outputs:
+  add-labels:
+    allowed: [bug, feature, security, planned]
+  add-comment:
+    hide-older-comments: true
   create-issue:
-    title-prefix: "[audit]"
-    close-older-issues: true
-```
-
-```markdown
-# Daily Code Audit
-
-## State Management
-Read `audit-coverage` from cache-memory. This tracks which packages have been audited and when.
-
-## Selection Algorithm
-Choose the next package to audit:
-- 60% chance: pick from packages modified in the last 7 days (prioritize recent changes)
-- 30% chance: pick the package with the oldest audit date (ensure coverage rotation)
-- 10% chance: re-audit a previously audited package (verify consistency)
-
-## Audit Process
-1. List all Go files in the selected package
-2. Check for: missing error handling, unused exports, naming violations, missing tests
-3. Create one issue with findings, or skip if no issues found
-
-## State Update
-Update `audit-coverage` with the package name and today's date.
+    title-prefix: "[plan] "
+    labels: [planned]
 ```
 
 ---
 
-## Choosing the Right Pattern
+## 5. Event Chain (Reactive Cascade)
 
-| Factor | Direct Dispatch | Multi-Phase | Causal Chains | Conditional | Recursive |
-|--------|----------------|-------------|---------------|-------------|-----------|
-| Complexity | Low | High | Medium | Medium | Medium |
-| Traceability | Low | High | Very High | Low | Medium |
-| Coordination | None | Multi-agent | Multi-agent | Single agent | Single agent |
-| State | Stateless | Per-phase | Linked | Stateless | Stateful |
-| Best for | Simple tasks | Complex pipelines | Auditable flows | Event routing | Long campaigns |
+**Workflows react to outputs from other workflows.** Labels or issues created by one workflow trigger another.
+
+**Use when:** Complex multi-stage processing where each stage's output is another's input.
+
+### Characteristics
+- Loosely coupled — workflows only share events
+- Emergent behavior from simple rules
+- Harder to debug (trace across workflows)
+
+### Example
+
+**Workflow 1:** New issue → adds `needs-triage` label
+**Workflow 2:** `needs-triage` label added → performs triage → adds `bug` or `feature`
+**Workflow 3:** `bug` label added → assigns to bug-fix team
+
+### Design Considerations
+- Use unique label prefixes to avoid infinite loops
+- Document the chain in a README or architecture diagram
+- Monitor for circular triggers
+- Set `max` limits to prevent runaway cascades
+
+---
+
+## 6. Scheduled Batch Processing
+
+**Cron-triggered workflows that process accumulated items.**
+
+**Use when:** Periodic reporting, batch cleanup, trend analysis.
+
+### Characteristics
+- Time-based trigger, not event-based
+- Processes multiple items per run
+- Often creates summary issues or reports
+
+### Implementation
+
+```yaml
+on:
+  schedule: daily
+
+permissions:
+  issues: read
+  contents: read
+
+safe-outputs:
+  create-issue:
+    title-prefix: "[daily-report] "
+    labels: [report, automated]
+    close-older-issues: true
+    max: 1
+```
+
+### Best Practices
+- Use `close-older-issues: true` to prevent report accumulation
+- Set meaningful `title-prefix` for searchability
+- Use `expires` for auto-cleanup
+- Consider `cache-memory` for tracking trends across runs
+
+---
+
+## 7. Meta-Agent (Agent Monitoring Agents)
+
+**A workflow that monitors other workflows' outputs and health.**
+
+**Use when:** You need oversight, quality control, or coordination across multiple agentic workflows.
+
+### Characteristics
+- Requires `agentic-workflows:` tool and `actions: read` permission
+- Can read logs and audit trails from other workflows
+- Can dispatch corrective actions
+
+### Implementation
+
+```yaml
+permissions:
+  actions: read
+  issues: read
+
+tools:
+  agentic-workflows:
+  github:
+    toolsets: [issues, actions]
+
+safe-outputs:
+  create-issue:
+    title-prefix: "[meta-review] "
+    labels: [meta, review]
+  dispatch-workflow:
+    workflows: ["corrective-action.yml"]
+```
+
+---
+
+## Choosing a Pattern
+
+| Scenario | Recommended Pattern |
+|----------|-------------------|
+| Single-purpose automation | Direct Dispatch |
+| Event needs multiple independent actions | Fan-Out |
+| Multi-step with dependencies | Pipeline |
+| Human-initiated actions | ChatOps |
+| Complex multi-stage processing | Event Chain |
+| Periodic reporting or cleanup | Scheduled Batch |
+| Oversight and coordination | Meta-Agent |
+
+### Complexity vs. Capability Tradeoff
+
+```
+Direct Dispatch → Fan-Out → Pipeline → Event Chain → Meta-Agent
+(simple)                                              (complex)
+```
+
+Start with the simplest pattern that meets requirements. Refactor to more complex patterns only when needed.
