@@ -41,6 +41,7 @@ When analyzing workflow files, produce a comprehensive report covering these dim
 - **MCP tool definitions (CRITICAL):** Any custom tool using `command: docker` with `args: ["run", ...]` is a **Critical** finding. The compiler misparses raw `docker run` args, extracting non-image tokens as container names and causing `download_docker_images` pull failures. Must use `container` field instead.
 - **Network `defaults` alias (CRITICAL):** If `network.allowed` uses raw domains (e.g., `"api.github.com"`) without the `defaults` ecosystem alias, the GitHub MCP server will fail with `fetch failed`. Raw domains don't cover internal Docker proxy endpoints. `defaults` must always be present.
 - **Bash allowlist for event data (WARNING):** Event-triggered workflows need `cat` and `jq` in the bash allowlist so the agent can read `event.json` as a fallback when MCP data access fails.
+- **Missing `reaction:` field (CRITICAL):** Event-triggered workflows must include `reaction:` (e.g., `reaction: eyes`) in the `on:` block. Without it, the compiler generates `pre_activation` with no permissions, causing `Bad credentials` on membership check and skipping all jobs.
 
 ### 3. Orchestration Efficiency
 - Which orchestration pattern does this workflow follow? (Direct Dispatch, Multi-Phase, Causal Chains, Conditional, Recursive)

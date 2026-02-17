@@ -56,6 +56,8 @@ Options:
   - "Discussion events" → on.discussion
 ```
 
+For event-triggered workflows (issues, PRs, comments, discussions), always include `reaction: eyes` in the `on:` block. This is required for the compiler to grant permissions to `pre_activation`.
+
 ### Phase 2: Engine Selection
 
 ```
@@ -171,6 +173,7 @@ Validate an existing workflow file against the spec.
    - **MCP tool definitions** (CRITICAL): Check every custom tool entry under `tools:` for the `command: docker` anti-pattern. Any tool using `command: docker` with `args: ["run", ...]` MUST be rewritten to use the `container` field instead. The compiler cannot parse Docker image references from raw `docker run` args — it extracts non-image tokens (subcommands, flags) as container names, causing `download_docker_images` pull failures at runtime. Flag this as a **Critical** finding.
    - **Network `defaults` alias** (CRITICAL): If `network.allowed` lists raw domains (e.g., `"api.github.com"`) instead of the `defaults` ecosystem alias, the GitHub MCP server will fail with `fetch failed` — raw domains don't cover internal Docker proxy endpoints. `defaults` must always be present. Flag missing `defaults` as **Critical**.
    - **Bash allowlist for event data** (WARNING): For event-triggered workflows (issues, PRs, comments), verify `bash` includes `cat` and `jq` so the agent can read `event.json` as a fallback when MCP calls fail. Flag as **Warning** if missing.
+   - **Missing `reaction:` field** (CRITICAL): For event-triggered workflows, verify the `on:` block includes `reaction:` (e.g., `reaction: eyes`). Without it, the compiler generates `pre_activation` with no permissions, causing `Bad credentials` on the membership check and skipping all subsequent jobs. Flag as **Critical**.
 3. **Body validation:**
    - Check for H1 heading
    - Check for hardcoded values that should use `${{ }}` templating

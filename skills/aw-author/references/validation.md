@@ -178,6 +178,20 @@ These occur during workflow execution in GitHub Actions.
 - **Cause:** `permissions` block doesn't match what the workflow actually needs
 - **Fix:** Ensure needed permissions are declared. In strict mode, use `read` permissions and safe-outputs for writes. In non-strict mode (`strict: false`), `write` permissions are accepted.
 
+### Pre-Activation Bad Credentials from Missing `reaction` Field
+- **Symptom:** `pre_activation` job succeeds but `check_membership` reports `Bad credentials`. All subsequent jobs are skipped (activation → agent → safe_outputs).
+- **Cause:** Without a `reaction:` field in the `on:` block, the compiler generates the `pre_activation` job with **no permissions block**. The `GITHUB_TOKEN` defaults to `Metadata: read` only, which is insufficient for `check_membership.cjs` to query repository collaborator permissions.
+- **Fix:** Add `reaction: eyes` to the `on:` block for event-triggered workflows. This tells the compiler to grant `issues: write, pull-requests: write, discussions: write` to `pre_activation`, enabling the membership check. Also use `permissions: read-all` instead of listing individual `read` permissions.
+  ```yaml
+  on:
+    issues:
+      types: [opened]
+    reaction: eyes              # ← triggers pre_activation permissions
+
+  permissions: read-all         # ← broad read, writes via safe-outputs
+  ```
+- **Rule:** Every event-triggered workflow should include `reaction:` in the `on:` block.
+
 ### Engine Timeout
 - **Symptom:** Workflow killed mid-execution
 - **Cause:** `timeout-minutes` too low for the task, or agent stuck in a loop
@@ -210,6 +224,8 @@ These occur during workflow execution in GitHub Actions.
 - [ ] `network.allowed` includes `containers` alias if using Docker-based MCP tools
 - [ ] Custom domains in `network.allowed` only used for non-GitHub services (need `strict: false`)
 - [ ] `bash` allowlist includes `cat` and `jq` for event-triggered workflows (event.json fallback)
+- [ ] Event-triggered workflows include `reaction:` in `on:` block (required for pre_activation permissions)
+- [ ] `permissions: read-all` preferred over listing individual read permissions
 - [ ] `strict` setting matches the workflow's trust model
 
 ### Markdown Body
