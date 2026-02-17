@@ -38,6 +38,7 @@ When analyzing workflow files, produce a comprehensive report covering these dim
 - **Safe-output constraints:** Are allowlists tight? Are `max-per-run` limits set?
 - **Secret handling:** Are secrets referenced via `${{ secrets.* }}` and never hardcoded?
 - **Tool scoping:** Are `bash.allowed-commands` and `edit.allowed-paths` restricted?
+- **MCP tool definitions (CRITICAL):** Any custom tool using `command: docker` with `args: ["run", ...]` is a **Critical** finding. The compiler misparses raw `docker run` args, extracting non-image tokens as container names and causing `download_docker_images` pull failures. Must use `container` field instead.
 
 ### 3. Orchestration Efficiency
 - Which orchestration pattern does this workflow follow? (Direct Dispatch, Multi-Phase, Causal Chains, Conditional, Recursive)

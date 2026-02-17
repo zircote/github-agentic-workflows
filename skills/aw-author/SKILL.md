@@ -86,6 +86,14 @@ Options:
 
 For each selected tool, configure relevant sub-options (e.g., GitHub toolsets, bash command arrays).
 
+If the user wants to add a Docker-based MCP server, **always** use the `container` field:
+```yaml
+my-server:
+  container: "ghcr.io/org/image"
+  args: ["subcommand"]
+```
+**NEVER** generate `command: docker` with `args: ["run", ...]` — this causes the compiler to misparse args as image names, breaking the `download_docker_images` step at runtime.
+
 ### Phase 4: Safe Outputs
 
 ```
@@ -138,6 +146,7 @@ Collect all requirements in a single structured prompt, then generate the comple
 
 1. Ask the user to describe the workflow in detail: purpose, trigger, tools needed, outputs expected
 2. Generate the complete frontmatter based on the description
+   - For Docker-based MCP tools, **always** use `container` field — never `command: docker`
 3. Generate the prose body following best practices from `references/markdown-body.md`
 4. Present the complete file
 5. Offer iterative refinement
@@ -155,6 +164,7 @@ Validate an existing workflow file against the spec.
    - Check types and values (integers, valid event types, valid permission levels)
    - Check `safe-outputs` operations are properly constrained
    - Verify `permissions` match what `tools` and `safe-outputs` require
+   - **MCP tool definitions** (CRITICAL): Check every custom tool entry under `tools:` for the `command: docker` anti-pattern. Any tool using `command: docker` with `args: ["run", ...]` MUST be rewritten to use the `container` field instead. The compiler cannot parse Docker image references from raw `docker run` args — it extracts non-image tokens (subcommands, flags) as container names, causing `download_docker_images` pull failures at runtime. Flag this as a **Critical** finding.
 3. **Body validation:**
    - Check for H1 heading
    - Check for hardcoded values that should use `${{ }}` templating
@@ -210,6 +220,7 @@ Diagnose issues with a failing or misbehaving workflow.
    - Check for permission insufficiency
    - Check for timeout issues
    - Check for context window exhaustion patterns
+   - **Docker image pull failures**: If the error mentions `pull access denied` or `repository does not exist` in the `Download container images` step, check for `command: docker` in MCP tool definitions — the compiler misparsed args as image names. Fix by converting to `container` field.
 4. **Behavioral debugging:**
    - Compare intended behavior (from prose) with actual behavior
    - Check for instruction ambiguity
