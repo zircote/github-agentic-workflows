@@ -18,9 +18,9 @@ gh-aw workflows are markdown files with YAML frontmatter that define agentic aut
 
 - **Interactive authoring** — step-by-step guided workflow creation with prompts for triggers, engines, tools, safe-outputs, security, and prose body
 - **One-shot generation** — describe what you need and get a complete workflow file
-- **Validation** — check existing workflows against the gh-aw spec (frontmatter schema, body structure, cross-reference integrity)
+- **Validation** — run `gh aw compile` for structural validation, then deep-check intent-level issues (permission scoping, safe-output coverage, prose-frontmatter alignment)
 - **Improvement analysis** — gap analysis, pattern matching against orchestration patterns, and quality scoring across completeness, security, clarity, and robustness
-- **Debug assistance** — diagnose compilation errors, runtime failures, and behavioral issues
+- **Debug assistance** — reproduce with `gh aw compile`, then diagnose runtime failures and behavioral issues
 - **Spec queries** — answer questions about gh-aw capabilities, syntax, and best practices
 - **Deep analysis agent** — delegate thorough multi-file reviews, security audits, and cross-workflow analysis to the `aw-analyst` agent
 
