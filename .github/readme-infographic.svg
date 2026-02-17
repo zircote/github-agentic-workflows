@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef9f0"/>
+      <stop offset="100%" stop-color="#fdf2e3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" rx="12" fill="url(#bg)" stroke="#e8ddd0" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="400" y="42" text-anchor="middle" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="#2d2118">How aw-author Works</text>
+
+  <!-- Flow: Describe → Author → Validate → Compile → Deploy -->
+
+  <!-- Step 1: Describe -->
+  <g transform="translate(80, 90)">
+    <rect width="120" height="100" rx="10" fill="white" stroke="#e07a3a" stroke-width="2" opacity="0.9"/>
+    <text x="60" y="35" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="24">💬</text>
+    <text x="60" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#2d2118">Describe</text>
+    <text x="60" y="75" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Tell Claude what</text>
+    <text x="60" y="87" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">your workflow does</text>
+  </g>
+
+  <!-- Arrow 1→2 -->
+  <path d="M208,140 L240,140" stroke="#ccc" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <polygon points="238,136 246,140 238,144" fill="#ccc"/>
+
+  <!-- Step 2: Author -->
+  <g transform="translate(250, 90)">
+    <rect width="120" height="100" rx="10" fill="white" stroke="#3a7bc8" stroke-width="2" opacity="0.9"/>
+    <text x="60" y="35" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="24">📝</text>
+    <text x="60" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#2d2118">Author</text>
+    <text x="60" y="75" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Guided YAML +</text>
+    <text x="60" y="87" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">markdown generation</text>
+  </g>
+
+  <!-- Arrow 2→3 -->
+  <polygon points="408,136 416,140 408,144" fill="#ccc"/>
+  <path d="M378,140 L410,140" stroke="#ccc" stroke-width="2" fill="none"/>
+
+  <!-- Step 3: Validate -->
+  <g transform="translate(420, 90)">
+    <rect width="120" height="100" rx="10" fill="white" stroke="#6b9e4f" stroke-width="2" opacity="0.9"/>
+    <text x="60" y="35" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="24">✅</text>
+    <text x="60" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#2d2118">Validate</text>
+    <text x="60" y="75" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Check against</text>
+    <text x="60" y="87" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">gh-aw spec</text>
+  </g>
+
+  <!-- Arrow 3→4 -->
+  <polygon points="578,136 586,140 578,144" fill="#ccc"/>
+  <path d="M548,140 L580,140" stroke="#ccc" stroke-width="2" fill="none"/>
+
+  <!-- Step 4: Compile -->
+  <g transform="translate(590, 90)">
+    <rect width="120" height="100" rx="10" fill="white" stroke="#d4553b" stroke-width="2" opacity="0.9"/>
+    <text x="60" y="35" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="24">⚙️</text>
+    <text x="60" y="58" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#2d2118">Compile</text>
+    <text x="60" y="75" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">gh aw compile →</text>
+    <text x="60" y="87" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">GitHub Actions</text>
+  </g>
+
+  <!-- Capabilities row -->
+  <text x="400" y="235" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="600" fill="#6b5d4f" letter-spacing="2">CAPABILITIES</text>
+
+  <!-- Capability cards -->
+  <g transform="translate(40, 255)">
+    <rect width="130" height="55" rx="8" fill="white" stroke="#e8ddd0" stroke-width="1"/>
+    <text x="65" y="25" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#e07a3a">Interactive</text>
+    <text x="65" y="42" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Step-by-step guided</text>
+  </g>
+  <g transform="translate(185, 255)">
+    <rect width="130" height="55" rx="8" fill="white" stroke="#e8ddd0" stroke-width="1"/>
+    <text x="65" y="25" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#3a7bc8">One-Shot</text>
+    <text x="65" y="42" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Generate from desc</text>
+  </g>
+  <g transform="translate(330, 255)">
+    <rect width="130" height="55" rx="8" fill="white" stroke="#e8ddd0" stroke-width="1"/>
+    <text x="65" y="25" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#6b9e4f">Improve</text>
+    <text x="65" y="42" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Gap analysis + scoring</text>
+  </g>
+  <g transform="translate(475, 255)">
+    <rect width="130" height="55" rx="8" fill="white" stroke="#e8ddd0" stroke-width="1"/>
+    <text x="65" y="25" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#d4553b">Debug</text>
+    <text x="65" y="42" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Diagnose failures</text>
+  </g>
+  <g transform="translate(620, 255)">
+    <rect width="130" height="55" rx="8" fill="white" stroke="#e8ddd0" stroke-width="1"/>
+    <text x="65" y="25" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#8a6bbf">Deep Analysis</text>
+    <text x="65" y="42" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#8a7b6b">Multi-file audit</text>
+  </g>
+
+  <!-- Engines row -->
+  <text x="400" y="350" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#8a7b6b">Supports engines: <tspan font-weight="600">Copilot</tspan> · <tspan font-weight="600">Claude</tspan> · <tspan font-weight="600">Codex</tspan></text>
+
+  <!-- Bottom accent -->
+  <path d="M20,385 Q400,370 780,385" stroke="#e07a3a" stroke-width="2" fill="none" opacity="0.15"/>
+</svg>

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1612"/>
+      <stop offset="100%" stop-color="#211c16"/>
+    </linearGradient>
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e07a3a"/>
+      <stop offset="100%" stop-color="#d4553b"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5a9be0"/>
+      <stop offset="100%" stop-color="#4080c4"/>
+    </linearGradient>
+    <linearGradient id="accent3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8bc26a"/>
+      <stop offset="100%" stop-color="#6ba04e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <!-- Organic hand-drawn style shapes -->
+  <path d="M-20,80 Q60,20 140,60 Q220,100 180,180 Q140,260 60,220 Q-20,180 -20,80Z" fill="url(#accent1)" opacity="0.08"/>
+  <path d="M1050,30 Q1120,-10 1180,40 Q1240,90 1200,160 Q1160,230 1090,200 Q1020,170 1010,100 Q1000,50 1050,30Z" fill="url(#accent2)" opacity="0.07"/>
+  <path d="M80,480 Q150,440 220,470 Q290,500 270,570 Q250,620 170,610 Q90,600 60,540 Q40,500 80,480Z" fill="url(#accent3)" opacity="0.08"/>
+  <path d="M1100,500 Q1170,460 1240,490 Q1310,520 1280,590 Q1260,650 1180,640 Q1100,630 1080,560 Q1060,520 1100,500Z" fill="url(#accent1)" opacity="0.06"/>
+
+  <!-- Scattered organic dots -->
+  <circle cx="300" cy="120" r="8" fill="#e07a3a" opacity="0.10"/>
+  <circle cx="950" cy="100" r="6" fill="#5a9be0" opacity="0.08"/>
+  <circle cx="180" cy="380" r="5" fill="#8bc26a" opacity="0.10"/>
+  <circle cx="1080" cy="350" r="7" fill="#d4553b" opacity="0.07"/>
+  <circle cx="400" cy="530" r="5" fill="#5a9be0" opacity="0.08"/>
+  <circle cx="850" cy="550" r="6" fill="#8bc26a" opacity="0.07"/>
+
+  <!-- Subtle connecting lines -->
+  <path d="M320,125 Q450,160 520,200" stroke="#e07a3a" stroke-width="1.5" fill="none" opacity="0.06" stroke-linecap="round"/>
+  <path d="M760,200 Q870,150 945,105" stroke="#5a9be0" stroke-width="1.5" fill="none" opacity="0.06" stroke-linecap="round"/>
+
+  <!-- Workflow icon cluster (center-left) -->
+  <!-- Document icon -->
+  <g transform="translate(340, 240)" opacity="0.75">
+    <rect x="0" y="0" width="48" height="60" rx="6" fill="none" stroke="#e07a3a" stroke-width="2.5"/>
+    <path d="M32,0 L48,16" stroke="#e07a3a" stroke-width="2.5" fill="none"/>
+    <path d="M32,0 L32,16 L48,16" stroke="#e07a3a" stroke-width="2" fill="none"/>
+    <line x1="10" y1="28" x2="38" y2="28" stroke="#e07a3a" stroke-width="2" opacity="0.4"/>
+    <line x1="10" y1="36" x2="38" y2="36" stroke="#e07a3a" stroke-width="2" opacity="0.4"/>
+    <line x1="10" y1="44" x2="28" y2="44" stroke="#e07a3a" stroke-width="2" opacity="0.4"/>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M400,275 Q430,270 460,275" stroke="#666" stroke-width="2" fill="none" opacity="0.3" stroke-linecap="round"/>
+  <path d="M455,270 L462,275 L455,280" stroke="#666" stroke-width="2" fill="none" opacity="0.3" stroke-linecap="round"/>
+
+  <!-- Gear/compile icon -->
+  <g transform="translate(470, 252)" opacity="0.75">
+    <circle cx="24" cy="24" r="16" fill="none" stroke="#5a9be0" stroke-width="2.5"/>
+    <circle cx="24" cy="24" r="6" fill="none" stroke="#5a9be0" stroke-width="2"/>
+    <line x1="24" y1="2" x2="24" y2="10" stroke="#5a9be0" stroke-width="2.5"/>
+    <line x1="24" y1="38" x2="24" y2="46" stroke="#5a9be0" stroke-width="2.5"/>
+    <line x1="2" y1="24" x2="10" y2="24" stroke="#5a9be0" stroke-width="2.5"/>
+    <line x1="38" y1="24" x2="46" y2="24" stroke="#5a9be0" stroke-width="2.5"/>
+  </g>
+
+  <!-- Arrow -->
+  <path d="M530,275 Q560,270 590,275" stroke="#666" stroke-width="2" fill="none" opacity="0.3" stroke-linecap="round"/>
+  <path d="M585,270 L592,275 L585,280" stroke="#666" stroke-width="2" fill="none" opacity="0.3" stroke-linecap="round"/>
+
+  <!-- GitHub Actions icon -->
+  <g transform="translate(600, 252)" opacity="0.75">
+    <circle cx="24" cy="24" r="20" fill="none" stroke="#8bc26a" stroke-width="2.5"/>
+    <path d="M16,20 L22,26 L32,16" stroke="#8bc26a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14,32 L34,32" stroke="#8bc26a" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="640" y="360" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="54" font-weight="bold" fill="#ede4d6" letter-spacing="-1">aw-author</text>
+
+  <!-- Subtitle -->
+  <text x="640" y="405" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#a89880" letter-spacing="0.5">GitHub Agentic Workflow Authoring Plugin</text>
+
+  <!-- Feature tags -->
+  <g transform="translate(640, 445)" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="14" fill="#8a7b6b">
+    <text x="-240" y="0">Author</text>
+    <circle cx="-185" cy="-4" r="2" fill="#e07a3a" opacity="0.5"/>
+    <text x="-140" y="0">Validate</text>
+    <circle cx="-85" cy="-4" r="2" fill="#5a9be0" opacity="0.5"/>
+    <text x="-35" y="0">Improve</text>
+    <circle cx="25" cy="-4" r="2" fill="#8bc26a" opacity="0.5"/>
+    <text x="80" y="0">Debug</text>
+    <circle cx="125" cy="-4" r="2" fill="#e07a3a" opacity="0.5"/>
+    <text x="185" y="0">Analyze</text>
+  </g>
+
+  <!-- Claude Code badge -->
+  <g transform="translate(640, 490)" text-anchor="middle">
+    <rect x="-80" y="-14" width="160" height="28" rx="14" fill="#ede4d6" opacity="0.06"/>
+    <text font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#8a7b6b" letter-spacing="1.5">CLAUDE CODE PLUGIN</text>
+  </g>
+
+  <!-- Bottom border accent -->
+  <path d="M0,630 Q320,615 640,625 Q960,635 1280,620" stroke="url(#accent1)" stroke-width="3" fill="none" opacity="0.15"/>
+  <path d="M0,636 Q320,625 640,632 Q960,639 1280,628" stroke="url(#accent2)" stroke-width="2" fill="none" opacity="0.08"/>
+</svg>
