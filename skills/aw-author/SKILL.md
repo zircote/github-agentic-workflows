@@ -181,8 +181,10 @@ Use expression syntax for dynamic values:
 
 1. Assemble the complete workflow file combining frontmatter + prose body
 2. Write to `.github/workflows/<name>.md`
-3. Remind the user to compile: `gh aw compile`
-4. Validate the output against `references/validation.md`
+3. Run `gh aw compile` to validate and generate the lock file
+4. If compilation fails, diagnose the error and fix the workflow
+5. If compilation succeeds, confirm the generated `.lock.yml` file
+6. Run the skill's own checklist (see Validate Mode) for deeper analysis beyond what the compiler catches
 
 ---
 
@@ -193,8 +195,11 @@ Given a description, produce a complete workflow file in one step.
 1. Parse the user's description for: purpose, trigger, engine, tools, safe-outputs
 2. Infer sensible defaults for anything unspecified
 3. Generate the complete workflow file with annotated frontmatter
-4. Present the file and explain key decisions
-5. Offer to iterate on any section
+4. Write to `.github/workflows/<name>.md`
+5. Run `gh aw compile` to validate the generated workflow
+6. If compilation fails, fix the issue and recompile
+7. Present the file and explain key decisions
+8. Offer to iterate on any section
 
 Use the full spec knowledge from reference files to make informed defaults:
 - Default engine: `copilot`
@@ -208,22 +213,37 @@ Use the full spec knowledge from reference files to make informed defaults:
 
 Validate an existing workflow file against the gh-aw specification.
 
-### Validation Checklist
+### Step 1: Compiler Validation
 
-Run through these checks in order:
+Run `gh aw compile` against the workflow file first. This is the authoritative validation step — it catches:
+- YAML syntax errors
+- Unknown frontmatter keys (in strict mode)
+- Invalid trigger configurations
+- Safe-output schema violations
+- Permission insufficiencies
 
-1. **YAML syntax** — valid frontmatter delimiters, correct indentation, proper types
-2. **Required fields** — `on` trigger must be present
-3. **Trigger validity** — event types match gh-aw schema (`issues` not `issue`, correct `types` values)
-4. **Permission scoping** — permissions are sufficient for declared tools and safe-outputs, no unnecessary `write`
-5. **Tool configuration** — toolsets exist, bash allowlist is appropriate, no contradictions
-6. **Safe-output consistency** — every write operation in the prose has a matching safe-output declaration
-7. **Safe-output constraints** — allowlists are populated, `max` limits are set, `title-prefix` for created items
-8. **Cross-references** — tools match permissions, safe-outputs match permissions, prose matches both
-9. **Security posture** — `strict` mode appropriate, `lockdown` considered for public repos, secrets not hardcoded
-10. **Body structure** — H1 present, context section, clear instructions, edge cases handled
-11. **Expression syntax** — `${{ }}` expressions are valid, secrets referenced correctly
-12. **Anti-patterns** — check against `references/validation.md` known issues
+```bash
+gh aw compile <path-to-workflow.md>
+```
+
+If compilation fails, present the error to the user and diagnose the root cause using `references/validation.md`.
+
+If compilation succeeds, proceed to Step 2 for deeper analysis that the compiler does not cover.
+
+### Step 2: Deep Validation Checklist
+
+The compiler validates structure but not intent. Run through these additional checks:
+
+1. **Trigger scoping** — are event types appropriately narrow? (`issues: types: [opened]` vs catching all types)
+2. **Permission minimality** — are there unnecessary `write` permissions beyond what safe-outputs require?
+3. **Tool-prose alignment** — does the prose reference tools not declared in frontmatter?
+4. **Safe-output coverage** — does every write operation described in the prose have a matching safe-output?
+5. **Safe-output constraints** — are allowlists populated, `max` limits set, `title-prefix` on created items?
+6. **Cross-reference integrity** — do tools, permissions, safe-outputs, and prose all agree?
+7. **Security posture** — `strict` mode appropriate, `lockdown` considered for public repos, secrets not hardcoded
+8. **Body quality** — H1 present, context section, clear instructions, edge cases handled
+9. **Expression syntax** — `${{ }}` expressions are valid and reference real contexts
+10. **Anti-patterns** — check against `references/validation.md` known issues
 
 ### Output Format
 
@@ -287,33 +307,38 @@ Analyze an existing workflow and suggest improvements.
 
 Diagnose failing workflows.
 
-### Diagnostic Flow
+### Step 1: Reproduce with `gh aw compile`
 
-1. **Identify failure phase:**
-   - Compilation error → frontmatter/syntax issues
-   - Runtime error → tool/permission/timeout issues
-   - Behavioral error → prose/logic issues
+First, run the compiler to check for structural issues:
 
-2. **For compilation errors:**
-   - Check YAML syntax
-   - Check field names against schema in `references/frontmatter-schema.md`
-   - Check trigger configuration
-   - Check safe-output references
+```bash
+gh aw compile <path-to-workflow.md>
+```
 
-3. **For runtime errors:**
+This immediately surfaces YAML syntax errors, schema violations, trigger misconfigurations, and safe-output problems. If compilation fails, the error message identifies the issue — diagnose and fix using `references/validation.md`.
+
+### Step 2: Identify Failure Phase
+
+If compilation succeeds (or the user reports a runtime/behavioral issue):
+
+1. **Runtime error** — the workflow compiles but fails during execution:
    - Check permissions match actual tool usage
-   - Check timeout is sufficient
+   - Check timeout is sufficient for the task complexity
    - Check network access if external calls needed
    - Check safe-output constraints aren't too restrictive
+   - Check MCP server configuration (env vars, args, container image)
 
-4. **For behavioral errors:**
+2. **Behavioral error** — the workflow runs but produces wrong results:
    - Review prose instructions for ambiguity
    - Check if the agent has sufficient context
    - Check tool selection matches the task
    - Review safe-output allowlists for missing values
+   - Check for `event.json` fallback if event context is missing
+
+### Step 3: Gather Context
 
 Ask the user to provide:
-- The workflow file
+- The workflow file (if not already available)
 - Error messages or logs (from GitHub Actions)
 - Expected vs actual behavior
 
