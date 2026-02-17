@@ -3,6 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-7c3aed)](https://docs.anthropic.com/en/docs/claude-code)
 [![gh-aw](https://img.shields.io/badge/gh--aw-Agentic_Workflows-blue)](https://github.github.com/gh-aw/)
+[![Version](https://img.shields.io/badge/version-1.0.0-green)](https://github.com/zircote/github-agentic-workflows)
+[![GitHub Stars](https://img.shields.io/github/stars/zircote/github-agentic-workflows?style=flat)](https://github.com/zircote/github-agentic-workflows/stargazers)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/social-preview-dark.svg">
