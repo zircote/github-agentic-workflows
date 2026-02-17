@@ -84,6 +84,18 @@ safe-outputs:
 ```
 **Impact:** Issue spam, notification fatigue, difficult rollback.
 
+### Explicit MCP Tool Names in Prose Body
+**Problem:** Referencing specific MCP tool function names (e.g., `get_issue`, `create_pull_request`) in the prose body. MCP tool names vary by server version and the agent may not recognize them. The gh-aw agent maps natural language instructions to available tools automatically.
+```markdown
+# Bad — hardcoded tool name that may not exist
+Fetch the triggering issue using the github MCP server's `get_issue` tool.
+
+# Good — natural language with template expressions
+Read the details of issue #${{ github.event.issue.number }} in
+${{ github.repository }}. Extract the title, body, and labels.
+```
+**Impact:** Agent calls a non-existent tool, gets `MCP error -32603: fetch failed`, and cannot recover. The workflow produces no output.
+
 ### Over-Permissioned Workflows
 **Problem:** Requesting write permissions when only read is needed.
 ```yaml
@@ -234,6 +246,7 @@ These occur during workflow execution in GitHub Actions.
 - [ ] Edge cases are explicitly handled
 - [ ] Output format is defined
 - [ ] No hardcoded values (use `${{ }}` templating)
+- [ ] No explicit MCP tool names (use natural language; agent maps to available tools)
 - [ ] No raw context injection (targeted reads, not bulk)
 - [ ] Failure modes are addressed ("if X fails, do Y")
 

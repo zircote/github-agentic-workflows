@@ -177,6 +177,7 @@ Validate an existing workflow file against the spec.
 3. **Body validation:**
    - Check for H1 heading
    - Check for hardcoded values that should use `${{ }}` templating
+   - **Explicit MCP tool names** (WARNING): Check for references to specific MCP tool function names (e.g., `get_issue`, `create_pull_request`, `issue_read`). The prose body should use natural language instructions — the agent maps these to available tools automatically. Hardcoded tool names may not match the registered tool names, causing `fetch failed` errors. Flag as **Warning**.
    - Check for vague instructions
    - Check for missing edge case handling
 4. **Cross-reference validation:**

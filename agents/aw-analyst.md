@@ -56,6 +56,7 @@ When analyzing workflow files, produce a comprehensive report covering these dim
 - Are edge cases explicitly handled?
 - Is the output format clearly defined?
 - Are there hardcoded values that should use `${{ }}` templating?
+- **Explicit MCP tool names (WARNING):** Does the prose body reference specific MCP tool function names (e.g., `get_issue`, `issue_read`)? The agent maps natural language to available tools — hardcoded tool names may not match registered names, causing `fetch failed` errors.
 - Is there raw context injection (reading entire files/repos)?
 - Are failure modes addressed?
 
