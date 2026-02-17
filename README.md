@@ -84,6 +84,8 @@ skills/
     SKILL.md            # Core skill with mode detection and guided workflows
     references/
       frontmatter-schema.md   # Complete YAML frontmatter field reference
+      tools-reference.md      # All tool types and configuration
+      safe-outputs.md         # Full safe-output catalog and constraints
       markdown-body.md        # Prose body best practices
       orchestration.md        # Workflow orchestration patterns
       validation.md           # Validation checklist and common failures
