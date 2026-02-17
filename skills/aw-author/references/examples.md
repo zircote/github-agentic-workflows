@@ -15,10 +15,10 @@ Complete gh-aw workflow examples with annotated frontmatter and prose body.
 name: "Issue Triage"
 description: "Classify and label new issues based on content analysis"
 timeout-minutes: 5
-lockdown: false                      # ← Required for public repos to process external issues
+strict: false                        # ← Required to process external/untrusted input
 
 on:
-  issue:
+  issues:                            # ← NOTE: plural "issues", not "issue"
     types: [opened, reopened]        # ← Only trigger on new/reopened, not edits
 
 permissions:
@@ -39,8 +39,7 @@ safe-outputs:
       - question
       - help-wanted
       - good-first-issue
-  add-comment:
-    max-length: 2000                 # ← Prevent verbose comments
+  add-comment: {}                    # ← No sub-field constraints in v0.45.0
 ---
 
 # Issue Triage Agent
@@ -112,20 +111,15 @@ engine:
 
 permissions:
   contents: read
-  pull-requests: read                # ← Read PR details, reviews via safe-outputs
+  pull-requests: read                # ← Read PR details, writes via safe-outputs
 
 tools:
   github:
-    toolsets: [pull-requests, issues]
-  edit:
-    enabled: false                   # ← Review only, no code changes
-  bash:
-    enabled: true
-    allowed-commands: [grep, wc, find, diff]  # ← Read-only analysis commands
+    toolsets: [pull_requests, issues] # ← NOTE: pull_requests uses underscore
+  bash: [grep, wc, find, diff]       # ← Array of allowed commands
 
 safe-outputs:
-  add-comment:
-    max-length: 10000                # ← Reviews can be detailed
+  add-comment: {}                    # ← No sub-field constraints in v0.45.0
   add-labels:
     allowed: [needs-changes, approved, security-concern, performance-concern]
 ---
@@ -214,14 +208,12 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  discussions: write                 # ← Write to create discussion posts
+  discussions: read                  # ← Read only; writes go through safe-outputs
 
 tools:
   github:
-    toolsets: [issues, pull-requests, discussions, commits]
-  cache-memory:
-    enabled: true
-    ttl: "48h"                       # ← Keep state for 2 days
+    toolsets: [issues, pull_requests, discussions]  # ← underscore in pull_requests
+  cache-memory: null
 
 safe-outputs:
   create-discussion:
@@ -230,7 +222,6 @@ safe-outputs:
   create-issue:                      # ← For follow-up action items
     title-prefix: "[action-item]"
     labels: [action-item]
-    max-per-run: 3
 ---
 
 # Daily Status Report
@@ -307,27 +298,26 @@ roles:
   deployers: "@org/deploy-team"      # ← Only these users can deploy
   admins: "@org/admins"
 
+strict: false                          # ← Required for custom network domains and write perms
+
 permissions:
   contents: read
   issues: read
-  actions: write                     # ← Trigger deployment workflows
+  actions: read                      # ← Read in strict mode; action triggers via safe-outputs
 
 tools:
   github:
     toolsets: [issues, actions]
-  bash:
-    enabled: true
-    allowed-commands: [curl, jq]     # ← For API calls to deployment service
+  bash: [curl, jq]                   # ← Array of allowed commands
 
 network:
   allowed:
-    - "api.github.com"
-    - "deploy.internal.example.com"  # ← Internal deployment API
-  firewall: strict                   # ← Block all other outbound traffic
+    - defaults                       # ← GitHub API domains
+    - "deploy.internal.example.com"  # ← Internal deployment API (requires strict: false)
+  firewall: true                     # ← Enable firewall with allowed list
 
 safe-outputs:
-  add-comment:
-    max-length: 3000
+  add-comment: {}
   add-reaction:
     allowed: ["+1", "rocket", "eyes", "-1"]
   add-labels:

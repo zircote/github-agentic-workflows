@@ -21,13 +21,13 @@ When `strict: true` is set:
 
 ### Trigger Conflicts
 - **Overlapping schedules:** Two workflows with the same cron expression compete for resources
-- **Ambiguous event types:** Using both `issue` and `issue_comment` without clear separation can cause double-processing
-- **Missing event types:** `on: issue: {}` without `types` defaults to all event types — often too broad
+- **Ambiguous event types:** Using both `issues` and `issue_comment` without clear separation can cause double-processing
+- **Missing event types:** `on: issues: {}` without `types` defaults to all event types — often too broad
 
 ### Safe-Output Violations
 - **Referencing undefined operations:** Using `create-pull-request` in prose when it's not in `safe-outputs`
 - **Label not in allowlist:** Agent attempts to add a label not in `safe-outputs.add-labels.allowed`
-- **Exceeding `max-per-run`:** Attempting to create more artifacts than allowed
+- **Exceeding output limits:** Attempting to create more artifacts than the workflow design intends
 
 ---
 
@@ -76,10 +76,9 @@ Select the next unaudited package.
 safe-outputs:
   create-issue: {}
 
-# Good
+# Good — use title-prefix and close-older-issues to constrain output
 safe-outputs:
   create-issue:
-    max-per-run: 3
     title-prefix: "[auto]"
     close-older-issues: true
 ```
@@ -118,6 +117,23 @@ Create an issue for each function that exceeds the threshold, with a suggested d
 
 These occur during workflow execution in GitHub Actions.
 
+### Docker Image Pull Failure from `command: docker` Pattern
+- **Symptom:** `Download container images` step fails with `pull access denied for mcp, repository does not exist`
+- **Cause:** MCP tool defined with `command: docker` and `args: ["run", "--rm", "-i", "ghcr.io/org/image", "mcp"]`. The compiler cannot correctly parse Docker image references from raw `docker run` args — it extracts non-image tokens (e.g., `mcp`) as container names and misses the actual image.
+- **Fix:** Use the `container` field for Docker-based MCP servers:
+  ```yaml
+  # WRONG — causes image pull failure
+  my-server:
+    command: docker
+    args: ["run", "--rm", "-i", "ghcr.io/org/image", "mcp"]
+
+  # CORRECT — compiler properly resolves the image
+  my-server:
+    container: "ghcr.io/org/image"
+    args: ["mcp"]
+  ```
+- **Rule:** Reserve `command` for non-Docker executables (e.g., `command: node`). Always use `container` for Docker images.
+
 ### Missing Secrets
 - **Symptom:** Engine fails to initialize, API calls return 401/403
 - **Cause:** `secrets` list in frontmatter references secrets not configured in repository settings
@@ -125,18 +141,18 @@ These occur during workflow execution in GitHub Actions.
 
 ### Network/Firewall Blocks
 - **Symptom:** Agent cannot reach external APIs, web-fetch fails
-- **Cause:** `network.firewall: strict` blocks domains not in the allowlist
-- **Fix:** Add required domains to `network.allowed`
+- **Cause:** `network.firewall: true` blocks domains not in the allowlist
+- **Fix:** Add required domains to `network.allowed`. Custom domains require `strict: false` at root level.
 
-### Lockdown Mode Rejections
-- **Symptom:** Agent skips issues from external contributors
-- **Cause:** `lockdown: true` (default for public repos) prevents interaction with untrusted content
-- **Fix:** Set `lockdown: false` for workflows that must process external input (e.g., issue triage)
+### Strict Mode Rejections
+- **Symptom:** Agent skips issues from external contributors, or write permissions rejected
+- **Cause:** `strict: true` (default) prevents interaction with untrusted content and blocks write permissions
+- **Fix:** Set `strict: false` for workflows that must process external input (e.g., issue triage). Use safe-outputs for all write operations.
 
 ### Token Permission Errors
 - **Symptom:** 403 errors on GitHub API calls
 - **Cause:** `permissions` block doesn't match what the workflow actually needs
-- **Fix:** Elevate permissions (e.g., `issues: read` to `issues: write`) and recompile
+- **Fix:** Ensure needed permissions are declared. In strict mode, use `read` permissions and safe-outputs for writes. In non-strict mode (`strict: false`), `write` permissions are accepted.
 
 ### Engine Timeout
 - **Symptom:** Workflow killed mid-execution
@@ -162,11 +178,12 @@ These occur during workflow execution in GitHub Actions.
 - [ ] `permissions` follow least-privilege principle
 - [ ] `timeout-minutes` is reasonable for the task (5-30 min typical)
 - [ ] `safe-outputs` constrain every write operation
-- [ ] `safe-outputs` include `max-per-run` where applicable
+- [ ] `safe-outputs` include appropriate constraints (title-prefix, allowed lists, etc.)
 - [ ] `tools` only include what's actually needed
+- [ ] Docker-based MCP tools use `container` field (NOT `command: docker` with args)
 - [ ] `secrets` are listed if the workflow uses external APIs
-- [ ] `network.allowed` includes all required external domains
-- [ ] `lockdown` setting matches the workflow's trust model
+- [ ] `network.allowed` includes all required external domains (custom domains need `strict: false`)
+- [ ] `strict` setting matches the workflow's trust model
 
 ### Markdown Body
 - [ ] H1 heading clearly states the workflow purpose

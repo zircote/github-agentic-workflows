@@ -21,7 +21,7 @@ gh-aw workflows can be orchestrated in various patterns depending on complexity.
 ### Example: Issue Labeler
 ```yaml
 on:
-  issue:
+  issues:
     types: [opened]
 permissions:
   issues: read
@@ -78,12 +78,11 @@ on:
     - cron: "0 2 * * *"
 permissions:
   contents: read
-  discussions: write
+  discussions: read
 tools:
   github:
     toolsets: [issues, discussions]
-  serena:
-    enabled: true
+  serena: null
 safe-outputs:
   create-discussion:
     category: "Code Review"
@@ -96,7 +95,7 @@ on:
     types: [created]
   # Triggers on /plan command
 permissions:
-  issues: write
+  issues: read
   discussions: read
 safe-outputs:
   create-issue:
@@ -206,15 +205,12 @@ on:
   schedule:
     - cron: "0 9 * * 1-5"
 tools:
-  cache-memory:
-    enabled: true
-    ttl: "168h"
+  cache-memory: null
   github:
     toolsets: [issues]
 safe-outputs:
   create-issue:
     title-prefix: "[audit]"
-    max-per-run: 1
     close-older-issues: true
 ```
 

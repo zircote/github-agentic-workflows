@@ -84,7 +84,7 @@ Options:
   - "MCP servers (custom integrations)"
 ```
 
-For each selected tool, configure relevant sub-options (e.g., GitHub toolsets, bash allowed-commands).
+For each selected tool, configure relevant sub-options (e.g., GitHub toolsets, bash command arrays).
 
 ### Phase 4: Safe Outputs
 
@@ -100,16 +100,16 @@ Options:
   - "Add reactions"
 ```
 
-For each selected operation, configure constraints (allowlists, max-per-run, prefixes).
+For each selected operation, configure constraints (allowlists, prefixes, draft mode, etc.).
 
 ### Phase 5: Security & Network
 
 ```
 AskUserQuestion: "What's the security posture?"
 Options:
-  - "Default (lockdown enabled, strict network)" → lockdown: true, firewall: strict
-  - "Public repo triage (lockdown disabled)" → lockdown: false
-  - "Custom network rules" → configure allowed/blocked domains
+  - "Default (strict mode, ecosystem-only network)" → strict: true, firewall: true
+  - "Public repo triage (strict disabled)" → strict: false
+  - "Custom network rules" → strict: false, configure allowed/blocked domains
 ```
 
 ### Phase 6: Prose Body
@@ -177,7 +177,7 @@ Analyze an existing workflow and suggest improvements.
 1. Read the workflow file
 2. **Gap analysis:**
    - Missing frontmatter fields that would improve the workflow
-   - Missing safe-output constraints (e.g., no `max-per-run`)
+   - Missing safe-output constraints (e.g., no `title-prefix` or `allowed` lists)
    - Over-permissioned declarations
    - Missing edge cases in prose body
 3. **Pattern matching:**
