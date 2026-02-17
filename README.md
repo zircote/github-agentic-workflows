@@ -1,5 +1,15 @@
 # aw-author
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Claude Code Plugin](https://img.shields.io/badge/Claude_Code-Plugin-7c3aed)](https://docs.anthropic.com/en/docs/claude-code)
+[![gh-aw](https://img.shields.io/badge/gh--aw-Agentic_Workflows-blue)](https://github.github.com/gh-aw/)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/social-preview-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/social-preview.svg">
+  <img alt="aw-author: GitHub Agentic Workflow Authoring Plugin" src=".github/social-preview.svg" width="100%">
+</picture>
+
 A Claude Code plugin for authoring, validating, and improving [GitHub Agentic Workflow](https://github.github.com/gh-aw/) (gh-aw) markdown files.
 
 gh-aw workflows are markdown files with YAML frontmatter that define agentic automation, compiled into GitHub Actions via `gh aw compile`. This plugin provides guided tooling to create, validate, improve, and debug those workflow files directly from Claude Code.
@@ -13,6 +23,10 @@ gh-aw workflows are markdown files with YAML frontmatter that define agentic aut
 - **Debug assistance** — diagnose compilation errors, runtime failures, and behavioral issues
 - **Spec queries** — answer questions about gh-aw capabilities, syntax, and best practices
 - **Deep analysis agent** — delegate thorough multi-file reviews, security audits, and cross-workflow analysis to the `aw-analyst` agent
+
+<picture>
+  <img alt="aw-author workflow: Describe → Author → Validate → Compile" src=".github/readme-infographic.svg" width="100%">
+</picture>
 
 ## Installation
 
