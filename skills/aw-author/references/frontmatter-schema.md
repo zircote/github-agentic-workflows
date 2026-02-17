@@ -272,13 +272,16 @@ network:
 
 ### Non-strict mode -- custom domains allowed
 
+> **CRITICAL:** Always include the `defaults` alias even when adding custom domains. The GitHub MCP server communicates through internal Docker proxy endpoints that raw domain strings (e.g., `"api.github.com"`) do not cover. Without `defaults`, GitHub MCP tool calls fail with `MCP error -32603: fetch failed`.
+
 ```yaml
 strict: false                    # ← Required for custom domains
 
 network:
   allowed:
-    - "api.github.com"
-    - "api.openai.com"
+    - defaults                   # ← ALWAYS include — required for GitHub MCP server
+    - containers                 # ← for ghcr.io / Docker-based MCP tools
+    - "api.openai.com"           # ← custom domains for non-GitHub services
     - "*.amazonaws.com"
   blocked:
     - "*.malicious.com"

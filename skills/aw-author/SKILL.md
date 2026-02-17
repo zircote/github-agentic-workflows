@@ -120,6 +120,10 @@ Options:
   - "Custom network rules" → strict: false, configure allowed/blocked domains
 ```
 
+**Network rules:** Always include `defaults` in `network.allowed` — it covers the internal proxy endpoints the GitHub MCP server requires. Raw domains like `"api.github.com"` are insufficient. Use `containers` for Docker-based MCP tools. Only add raw custom domains for non-GitHub services.
+
+**Bash allowlist:** For event-triggered workflows, always include `cat` and `jq` so the agent can read `event.json` as a fallback when MCP data access fails.
+
 ### Phase 6: Prose Body
 
 Guide the user through writing the markdown body sections:
@@ -165,6 +169,8 @@ Validate an existing workflow file against the spec.
    - Check `safe-outputs` operations are properly constrained
    - Verify `permissions` match what `tools` and `safe-outputs` require
    - **MCP tool definitions** (CRITICAL): Check every custom tool entry under `tools:` for the `command: docker` anti-pattern. Any tool using `command: docker` with `args: ["run", ...]` MUST be rewritten to use the `container` field instead. The compiler cannot parse Docker image references from raw `docker run` args — it extracts non-image tokens (subcommands, flags) as container names, causing `download_docker_images` pull failures at runtime. Flag this as a **Critical** finding.
+   - **Network `defaults` alias** (CRITICAL): If `network.allowed` lists raw domains (e.g., `"api.github.com"`) instead of the `defaults` ecosystem alias, the GitHub MCP server will fail with `fetch failed` — raw domains don't cover internal Docker proxy endpoints. `defaults` must always be present. Flag missing `defaults` as **Critical**.
+   - **Bash allowlist for event data** (WARNING): For event-triggered workflows (issues, PRs, comments), verify `bash` includes `cat` and `jq` so the agent can read `event.json` as a fallback when MCP calls fail. Flag as **Warning** if missing.
 3. **Body validation:**
    - Check for H1 heading
    - Check for hardcoded values that should use `${{ }}` templating

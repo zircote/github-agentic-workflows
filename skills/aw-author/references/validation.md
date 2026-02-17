@@ -144,6 +144,30 @@ These occur during workflow execution in GitHub Actions.
 - **Cause:** `network.firewall: true` blocks domains not in the allowlist
 - **Fix:** Add required domains to `network.allowed`. Custom domains require `strict: false` at root level.
 
+### GitHub MCP Server Fetch Failure from Custom Network Domains
+- **Symptom:** GitHub MCP tool calls fail with `MCP error -32603: fetch failed`, even though `api.github.com` is in the allowed list
+- **Cause:** Listing raw domains (e.g., `"api.github.com"`) instead of using the `defaults` ecosystem alias. The GitHub MCP server communicates through internal Docker proxy endpoints and network paths that raw domain strings don't cover. The `defaults` alias includes all required GitHub API infrastructure.
+- **Fix:** Always include the `defaults` ecosystem alias in `network.allowed`. Add custom domains only for non-GitHub services:
+  ```yaml
+  network:
+    allowed:
+      - defaults              # ← REQUIRED for GitHub MCP server
+      - containers            # ← for ghcr.io / Docker images
+      - "custom-api.example.com"  # ← only for non-GitHub services
+    firewall: true
+  ```
+- **Rule:** Never rely on raw `api.github.com` to cover GitHub MCP server networking. Always use `defaults`.
+
+### Agent Cannot Read Issue/PR Data (Bash Allowlist)
+- **Symptom:** Agent reports `missing_data` — cannot access issue content via MCP, CLI, or event.json
+- **Cause:** The `bash` tool allowlist is too restrictive. If the GitHub MCP server fails, the agent's fallback is to read `event.json` with `cat`/`jq`. When those commands aren't allowed, all data access paths are blocked.
+- **Fix:** Always include `cat` and `jq` in the bash allowlist for workflows that process GitHub event data:
+  ```yaml
+  tools:
+    bash: [docker, git, cat, jq]  # cat/jq needed for event.json fallback
+  ```
+- **Rule:** For any workflow triggered by GitHub events (issues, PRs, comments), ensure bash allows `cat` and `jq` as fallback data access methods.
+
 ### Strict Mode Rejections
 - **Symptom:** Agent skips issues from external contributors, or write permissions rejected
 - **Cause:** `strict: true` (default) prevents interaction with untrusted content and blocks write permissions
@@ -182,7 +206,10 @@ These occur during workflow execution in GitHub Actions.
 - [ ] `tools` only include what's actually needed
 - [ ] Docker-based MCP tools use `container` field (NOT `command: docker` with args)
 - [ ] `secrets` are listed if the workflow uses external APIs
-- [ ] `network.allowed` includes all required external domains (custom domains need `strict: false`)
+- [ ] `network.allowed` includes `defaults` alias (required for GitHub MCP server)
+- [ ] `network.allowed` includes `containers` alias if using Docker-based MCP tools
+- [ ] Custom domains in `network.allowed` only used for non-GitHub services (need `strict: false`)
+- [ ] `bash` allowlist includes `cat` and `jq` for event-triggered workflows (event.json fallback)
 - [ ] `strict` setting matches the workflow's trust model
 
 ### Markdown Body
