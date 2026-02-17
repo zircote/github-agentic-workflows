@@ -1,0 +1,8 @@
+{
+  "name": "aw-author",
+  "description": "Guided authoring, validation, and refinement of GitHub Agentic Workflow (gh-aw) markdown files. Supports interactive guided mode, one-shot generation, validation, improvement analysis, and debugging.",
+  "author": {
+    "name": "Robert Allen",
+    "email": "zircote@gmail.com"
+  }
+}
