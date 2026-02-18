@@ -50,6 +50,10 @@ Occur during GitHub Actions execution.
 - **Network blocked:** External URL access when no `network` configuration
 - **MCP server connection failed:** Server not available, wrong args, missing env vars
 - **Container pull failed (silent):** Container-based MCP servers from `ghcr.io` fail silently if no GHCR login step is present. Add a `steps:` block with `docker login ghcr.io` using `${{ github.token }}`
+- **TLS certificate verify failed:** Container-based MCP servers built from `FROM scratch` or distroless images have no CA certificate bundle. Mount host certs: `mounts: ["/etc/ssl/certs:/etc/ssl/certs:ro"]` and set `SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"` in `env:`
+- **MCP server registers no tools (`tools: None`):** Server started but returned empty tool list — usually caused by an init-time API call failure (check MCP gateway logs for auth errors or TLS failures)
+- **Misleading tool error messages:** MCP tool errors like "no data found" may mask underlying TLS, auth, or network failures — always check `agent-artifacts/mcp-logs/{server}.log` for the real error
+- **Firewall blocking MCP traffic:** If firewall logs show only `api.openai.com` with no other domains, the MCP containers' API calls are being blocked — add the required API domains to `network.firewall.allowed` with `strict: false`
 
 ### Permission Errors
 - **Token insufficient:** `GITHUB_TOKEN` lacks required scope
@@ -116,6 +120,9 @@ The workflow runs but produces incorrect or unexpected results.
 | Overlapping triggers | Double-processing | Use distinct event types |
 | `container:` with non-Docker value | Compilation error | Use valid Docker image reference |
 | `container: ghcr.io/…` without GHCR login step | Silent runtime failure | Add `steps:` with `docker login ghcr.io` |
+| `container:` from scratch/distroless without CA certs | TLS calls fail silently | Add `mounts` + `SSL_CERT_FILE` env |
+| Custom API domains without `strict: false` | Compiler rejects non-ecosystem domains | Set `strict: false` in frontmatter |
+| Missing `node`/`python` ecosystem for npx/uvx MCP servers | Package install fails at runtime | Add `node`/`python` to network allowed |
 
 ### Prose Anti-Patterns
 
@@ -167,8 +174,22 @@ When a workflow fails, check in this order:
 - [ ] Edge cases handled
 - [ ] Output format matches safe-output types
 
-### 6. Runtime
+### 6. Network & TLS
+- [ ] Custom API domains (e.g., `*.datadoghq.com`) present in `network.firewall.allowed`
+- [ ] `strict: false` set if custom domains are used (ecosystem identifiers like `defaults`, `github`, `containers`, `node`, `python` work in strict mode; custom domains do not)
+- [ ] `node` ecosystem included if MCP servers use `npx` (for npm registry access)
+- [ ] `python` ecosystem included if MCP servers use `uvx` (for PyPI access)
+- [ ] Container-based MCP servers from minimal/scratch images have CA cert mounts (`mounts: ["/etc/ssl/certs:/etc/ssl/certs:ro"]` + `SSL_CERT_FILE` env var)
+
+### 7. Runtime
 - [ ] Timeout sufficient for task complexity
 - [ ] Engine configured correctly (API key secret present)
 - [ ] No circular imports
 - [ ] No conflicting workflows on same trigger
+
+### 8. MCP Server Diagnostics
+- [ ] Download `agent-artifacts/mcp-logs/{server}.log` from workflow run to see real errors (tool error messages can be misleading)
+- [ ] Check firewall logs — if only `api.openai.com` appears with no other domains, MCP containers are not reaching external APIs
+- [ ] Look for `tools: None` in MCP capability announcements — indicates the server started but registered no tools (likely an auth or init failure)
+- [ ] Check for silent secret failures — missing or empty `COPILOT_MCP_` secrets cause MCP servers to start but fail on first API call
+- [ ] Verify `SSL_CERT_FILE` env var is set for containers that mount host CA certs

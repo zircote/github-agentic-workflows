@@ -383,3 +383,7 @@ These rules apply across ALL modes:
 10. **`read-all` permission shorthand** expands to read on all permission scopes
 11. **`event.json` fallback** — when `${{ github.event }}` is unavailable, agents should check for `event.json` in the workspace
 12. **Container-based MCP servers from `ghcr.io` require a GHCR login step** — add a `steps:` block with `docker login ghcr.io` using `${{ github.token }}` before `safe-outputs:`, or container pulls fail silently
+13. **Minimal/scratch Docker images have no CA certificates** — if a container-based MCP server uses `FROM scratch` or a distroless base, mount host certs with `mounts: ["/etc/ssl/certs:/etc/ssl/certs:ro"]` and set `SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"` in `env:`, or TLS calls fail with "certificate verify failed"
+14. **`strict: false` is also required for custom API domains** — ecosystem identifiers (`defaults`, `github`, `containers`, `node`, `python`) work in strict mode, but custom domains like `*.datadoghq.com` require `strict: false`
+15. **Add `node` and `python` ecosystems** when MCP servers use `npx` or `uvx` — these ecosystems allow package registry access (npm, PyPI) needed for process-based MCP servers
+16. **MCP gateway logs are the primary debug source** — when MCP tool calls return vague errors (e.g., "no data found"), download `agent-artifacts/mcp-logs/{server}.log` from the workflow run to see the real error (TLS failures, auth errors, timeouts)

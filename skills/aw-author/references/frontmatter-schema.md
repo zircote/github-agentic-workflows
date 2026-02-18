@@ -238,6 +238,32 @@ network:
 - Use `network: true` for unrestricted (discouraged)
 - Prefer explicit domain allowlists
 
+### Ecosystem Identifiers vs Custom Domains
+
+Ecosystem identifiers work in strict mode (`strict: true`, the default):
+- `defaults` — standard GitHub/Actions infrastructure
+- `github` — GitHub API and related domains
+- `containers` — Docker Hub, GHCR (`ghcr.io`), Quay
+- `node` — npm registries (needed for `npx`-based MCP servers)
+- `python` — PyPI (needed for `uvx`-based MCP servers)
+
+**Custom domains require `strict: false`.** Any domain not covered by an ecosystem identifier (e.g., `*.datadoghq.com`, `api.pagerduty.com`, `*.atlassian.net`) requires setting `strict: false` at the frontmatter root level, or the compiler rejects it.
+
+```yaml
+strict: false
+
+network:
+  firewall:
+    allowed:
+      - defaults
+      - github
+      - containers
+      - node
+      - python
+      - "*.datadoghq.com"
+      - "api.pagerduty.com"
+```
+
 ## Imports (`imports:`)
 
 ```yaml
@@ -262,6 +288,28 @@ mcp-servers:
       TOKEN: "${{ secrets.VALUE }}"
     allowed: ["tool_name"]
 ```
+
+### Container-Based MCP Servers
+
+```yaml
+mcp-servers:
+  server-name:
+    container: "ghcr.io/org/image:tag"
+    entrypointArgs:
+      - "subcommand"
+    env:
+      API_KEY: "${{ secrets.VALUE }}"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+    mounts:
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `entrypointArgs` | list | Arguments passed to the container's ENTRYPOINT |
+| `mounts` | list | Volume mounts in `"host:container:mode"` format |
+
+**CA Certificate Warning:** Containers built from `FROM scratch` or distroless base images have no CA certificate bundle. Without CA certs, all TLS connections fail with "certificate verify failed". Mount the host's CA certs read-only and set `SSL_CERT_FILE` to point to them.
 
 ## Complete Example
 

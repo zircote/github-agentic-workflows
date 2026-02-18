@@ -252,10 +252,12 @@ mcp-servers:
 | `command` | string | Executable path (process-based) |
 | `args` | list | Command arguments |
 | `container` | string | Docker image reference (alternative to command) |
+| `entrypointArgs` | list | Arguments passed to container ENTRYPOINT |
 | `url` | string | HTTP endpoint (alternative to command) |
 | `headers` | mapping | HTTP headers for url-based servers |
 | `registry` | string | MCP registry URI (informational only, does not affect execution) |
 | `env` | mapping | Environment variables |
+| `mounts` | list | Volume mounts in `"host:container:mode"` format |
 | `allowed` | list | Tool name restrictions |
 
 ### Execution Modes
@@ -295,6 +297,30 @@ steps:
 ```
 
 This applies to **all** container-based MCP servers pulling from `ghcr.io`, regardless of whether the image is public or private. The `github.token` is automatically available and has sufficient scope for package reads.
+
+### CA Certificates for Minimal Images
+
+Containers built from `FROM scratch` or distroless base images have **no CA certificate bundle**. Any TLS connection (HTTPS API calls) will fail with "certificate verify failed". The MCP tool may return a misleading error (e.g., "no data found") instead of the real TLS error — check `agent-artifacts/mcp-logs/{server}.log` for the actual failure.
+
+**Fix:** Mount the host runner's CA certs and set `SSL_CERT_FILE`:
+
+```yaml
+mcp-servers:
+  my-server:
+    container: ghcr.io/org/image:latest
+    env:
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+    mounts:
+      - "/etc/ssl/certs:/etc/ssl/certs:ro"
+```
+
+### Package Registry Access for Process-Based Servers
+
+Process-based MCP servers using `npx` or `uvx` need package registry access at runtime:
+- **`npx` servers** — add `node` to `network.firewall.allowed` (covers npm registries)
+- **`uvx` servers** — add `python` to `network.firewall.allowed` (covers PyPI)
+
+These ecosystem identifiers work in strict mode and do not require `strict: false`.
 
 ### Key Constraints
 
