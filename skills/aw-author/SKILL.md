@@ -382,3 +382,4 @@ These rules apply across ALL modes:
 9. **All workflow-created items** include a hidden `<!-- gh-aw-workflow-id: NAME -->` marker
 10. **`read-all` permission shorthand** expands to read on all permission scopes
 11. **`event.json` fallback** — when `${{ github.event }}` is unavailable, agents should check for `event.json` in the workspace
+12. **Container-based MCP servers from `ghcr.io` require a GHCR login step** — add a `steps:` block with `docker login ghcr.io` using `${{ github.token }}` before `safe-outputs:`, or container pulls fail silently

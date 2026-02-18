@@ -192,6 +192,38 @@ safe-outputs:
     append-only-comments: true
 ```
 
+## Steps (`steps:`)
+
+Pre-agent setup steps that run before the agentic workflow starts. These compile into GitHub Actions job steps that execute before the agent is invoked.
+
+```yaml
+steps:
+  - name: Login to GitHub Container Registry
+    run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+```
+
+### When Steps Are Required
+
+**Container-based MCP servers pulling from ghcr.io require GHCR authentication.** Without a login step, container pulls fail silently at runtime. This is the most common cause of container-based workflow failures.
+
+If your workflow uses `mcp-servers:` with a `container:` field referencing `ghcr.io`, you **must** include a GHCR login step:
+
+```yaml
+mcp-servers:
+  my-server:
+    container: ghcr.io/org/image:latest
+    env:
+      TOKEN: "${{ secrets.VALUE }}"
+
+steps:
+  - name: Login to GitHub Container Registry
+    run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+```
+
+The `steps:` block is placed after `mcp-servers:` (or after `tools:` if no MCP servers) and before `safe-outputs:`.
+
+---
+
 ## Network Configuration (`network:`)
 
 ```yaml

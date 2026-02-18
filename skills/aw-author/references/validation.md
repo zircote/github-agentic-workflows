@@ -49,6 +49,7 @@ Occur during GitHub Actions execution.
 - **Bash command blocked:** Attempting a command not in the allowlist
 - **Network blocked:** External URL access when no `network` configuration
 - **MCP server connection failed:** Server not available, wrong args, missing env vars
+- **Container pull failed (silent):** Container-based MCP servers from `ghcr.io` fail silently if no GHCR login step is present. Add a `steps:` block with `docker login ghcr.io` using `${{ github.token }}`
 
 ### Permission Errors
 - **Token insufficient:** `GITHUB_TOKEN` lacks required scope
@@ -114,6 +115,7 @@ The workflow runs but produces incorrect or unexpected results.
 | No `close-older-issues` on reports | Issue accumulation | Enable auto-cleanup |
 | Overlapping triggers | Double-processing | Use distinct event types |
 | `container:` with non-Docker value | Compilation error | Use valid Docker image reference |
+| `container: ghcr.io/…` without GHCR login step | Silent runtime failure | Add `steps:` with `docker login ghcr.io` |
 
 ### Prose Anti-Patterns
 
@@ -150,6 +152,7 @@ When a workflow fails, check in this order:
 - [ ] Bash allowlist covers required commands
 - [ ] MCP servers have correct env vars and args
 - [ ] Network config allows required external domains
+- [ ] Container-based MCP servers from `ghcr.io` have a GHCR login step in `steps:`
 
 ### 4. Safe-Outputs
 - [ ] Every write operation in prose has a matching safe-output

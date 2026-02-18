@@ -278,9 +278,28 @@ mcp-servers:
     allowed: ["send_message", "get_channel_history"]
 ```
 
+### Container Authentication (GHCR)
+
+**CRITICAL:** When using `container:` with images hosted on GitHub Container Registry (`ghcr.io`), you **must** add a GHCR login step in the `steps:` block. Without this, container pulls fail silently at runtime.
+
+```yaml
+mcp-servers:
+  datadog:
+    container: ghcr.io/org/datadog-mcp:latest
+    env:
+      DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+
+steps:
+  - name: Login to GitHub Container Registry
+    run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+```
+
+This applies to **all** container-based MCP servers pulling from `ghcr.io`, regardless of whether the image is public or private. The `github.token` is automatically available and has sufficient scope for package reads.
+
 ### Key Constraints
 
 - Tool declarations merge from imported components
 - GitHub App tokens auto-revoke after workflow completion
 - Lockdown mode auto-enables for public repos with custom tokens
 - The `registry` field is informational and doesn't affect execution
+- Container-based MCP servers from `ghcr.io` require a GHCR login step (see above)
