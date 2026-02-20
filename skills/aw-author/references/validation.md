@@ -37,6 +37,7 @@ When `strict: true` (default):
 - **Insufficient permissions:** Safe-outputs require matching write permissions
 - **Missing `actions: read`:** Required when using `agentic-workflows:` tool
 - **Missing `contents: write`:** Required for `push-to-pull-request-branch` and `update-release`
+- **Write permissions rejected:** The compiler rejects `write` values in `permissions:` — all writes must go through safe-outputs
 
 ---
 
@@ -59,6 +60,12 @@ Occur during GitHub Actions execution.
 - **Token insufficient:** `GITHUB_TOKEN` lacks required scope
 - **GitHub App scope mismatch:** App installed but missing repository access
 - **Cross-repo access denied:** `target-repo` specified but token lacks access
+- **`tools.github.app` permission inheritance:** App token requests ALL workflow-level permissions — if the App doesn't have a permission declared in `permissions:` (e.g., `packages: read`), token creation fails with HTTP 422 "permissions requested are not granted". Fix: remove `app:` or ensure the App has all declared permissions
+- **`tools.github` conflicts with `gh` CLI:** When `tools.github` is configured, the MCP server takes ownership of `GITHUB_TOKEN`, blocking `gh` CLI authentication in bash. Fix: remove `tools.github` if workflow only uses `gh` CLI, or use MCP tools exclusively
+- **`add-comment` discussions:write default:** The `add-comment` safe-output requests `discussions:write` by default. If the App lacks Discussions permission, token creation fails with HTTP 422. Fix: add `discussions: false` under `add-comment:`
+
+### Workflow File Push Errors
+- **`.yml` blocks App token push:** Standard `.yml`/`.yaml` files in `.github/workflows/` block GitHub App token branch pushes with "refusing to allow a GitHub App to create or update workflow without `workflows` permission". gh-aw compiled `.lock.yml` files are exempt. Fix: never mix standard `.yml` workflows with gh-aw workflows if using App tokens for safe-outputs like `create-pull-request`
 
 ### Timeout Errors
 - **Agent timeout:** Exceeded `timeout-minutes` — increase limit or simplify task
@@ -123,6 +130,14 @@ The workflow runs but produces incorrect or unexpected results.
 | `container:` from scratch/distroless without CA certs | TLS calls fail silently | Add `mounts` + `SSL_CERT_FILE` env |
 | Custom API domains without `strict: false` | Compiler rejects non-ecosystem domains | Set `strict: false` in frontmatter |
 | Missing `node`/`python` ecosystem for npx/uvx MCP servers | Package install fails at runtime | Add `node`/`python` to network allowed |
+| `tools.github.app` with mismatched permissions | HTTP 422 on App token creation | Omit `app:` or match App permissions to all declared `permissions:` |
+| `tools.github` alongside `gh` CLI in bash | Token conflict, `gh` auth fails | Choose one: MCP tools OR `gh` CLI, not both |
+| `add-comment` without `discussions: false` | HTTP 422 if App lacks Discussions | Always add `discussions: false` unless discussions needed |
+| `permissions: issues: write` | Compiler rejects write permissions | Use `read` only; writes go through safe-outputs |
+| Standard `.yml` in `.github/workflows/` with App tokens | App push blocked by GitHub | Use only `.lock.yml` (from `gh aw compile`); never add standard `.yml` workflows |
+| `${{ }}` expressions inside fenced code blocks | Agent gets literal strings, bash fails | Declare env vars in plain text, use `$VAR` in code blocks |
+| Double quotes in MCP `entrypointArgs` | Broken JSON in compiled lock file | Avoid `"` in command strings; use `grep` instead of `jq` with quotes |
+| MCP server printing to stdout before handshake | Server silently fails to initialize | Redirect all install/setup output to `/dev/null` |
 
 ### Prose Anti-Patterns
 
@@ -181,15 +196,32 @@ When a workflow fails, check in this order:
 - [ ] `python` ecosystem included if MCP servers use `uvx` (for PyPI access)
 - [ ] Container-based MCP servers from minimal/scratch images have CA cert mounts (`mounts: ["/etc/ssl/certs:/etc/ssl/certs:ro"]` + `SSL_CERT_FILE` env var)
 
-### 7. Runtime
+### 7. Token & App Authentication
+- [ ] If using `tools.github.app`, verify the GitHub App has **all** permissions declared in the workflow's `permissions:` block — not just the ones MCP tools need
+- [ ] If using `add-comment` safe-output, include `discussions: false` unless discussions are explicitly needed
+- [ ] If workflow uses both `tools.github` and `gh` CLI via bash, check for token ownership conflicts — choose one approach
+- [ ] If workflow pushes branches or creates PRs, ensure no standard `.yml`/`.yaml` files exist in `.github/workflows/` — only `.lock.yml` files are exempt from the App token workflow push restriction
+- [ ] `permissions:` block contains only `read` values — compiler rejects `write` permissions
+
+### 8. Runtime
 - [ ] Timeout sufficient for task complexity
 - [ ] Engine configured correctly (API key secret present)
 - [ ] No circular imports
 - [ ] No conflicting workflows on same trigger
+- [ ] `pull_request` trigger has stable merge ref — allow time between pushes to main and PR re-triggers
+- [ ] Frontmatter `if:` guard scopes workflow runs to intended events (saves compute)
 
-### 8. MCP Server Diagnostics
+### 9. MCP Server Diagnostics
 - [ ] Download `agent-artifacts/mcp-logs/{server}.log` from workflow run to see real errors (tool error messages can be misleading)
 - [ ] Check firewall logs — if only `api.openai.com` appears with no other domains, MCP containers are not reaching external APIs
 - [ ] Look for `tools: None` in MCP capability announcements — indicates the server started but registered no tools (likely an auth or init failure)
 - [ ] Check for silent secret failures — missing or empty `COPILOT_MCP_` secrets cause MCP servers to start but fail on first API call
 - [ ] Verify `SSL_CERT_FILE` env var is set for containers that mount host CA certs
+- [ ] No double quotes (`"`) in `entrypointArgs` values — `gh aw compile` does not escape them, producing broken JSON
+- [ ] All install/setup commands in MCP server startup redirect stdout to `/dev/null` — any stdout before JSON-RPC handshake breaks gateway init
+- [ ] `gh aw mcp inspect/list` does NOT follow `imports:` — check compiled `.lock.yml` to verify imported MCP servers
+
+### 10. Expression Interpolation
+- [ ] `${{ }}` expressions in fenced code blocks are NOT interpolated — agent receives literal text; use env vars instead
+- [ ] Dynamic values needed in bash code blocks are declared as env vars in plain text before the code block
+- [ ] `event.json` fallback documented for agents that need event data in code blocks

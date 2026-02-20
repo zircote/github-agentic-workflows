@@ -106,12 +106,36 @@ When analyzing, validate against the authoritative spec. If the embedded skill r
 1. **`issue` instead of `issues`** in trigger — must be plural
 2. **Missing `reaction: eyes`** on event-triggered workflows
 3. **`permissions: write-all`** or overly broad permissions
-4. **Bash `:*`** without justification
-5. **Safe-outputs without allowlists** — labels, reviewers, milestones should be constrained
-6. **Missing `title-prefix`** on `create-issue` or `create-pull-request`
-7. **No `max` limit** on high-volume safe-outputs
-8. **Prose referencing tools not declared** in frontmatter
-9. **Hardcoded secrets** instead of `${{ secrets.* }}`
-10. **MCP `container:` field** used incorrectly (must be a Docker image reference)
-11. **Missing `close-older-issues`** on recurring report workflows
-12. **No edge case handling** in prose body
+4. **`permissions: issues: write`** — compiler rejects write permissions; all writes go through safe-outputs
+5. **Bash `:*`** without justification
+6. **Safe-outputs without allowlists** — labels, reviewers, milestones should be constrained
+7. **Missing `title-prefix`** on `create-issue` or `create-pull-request`
+8. **No `max` limit** on high-volume safe-outputs
+9. **Prose referencing tools not declared** in frontmatter
+10. **Hardcoded secrets** instead of `${{ secrets.* }}`
+11. **MCP `container:` field** used incorrectly (must be a Docker image reference)
+12. **Missing `close-older-issues`** on recurring report workflows
+13. **No edge case handling** in prose body
+14. **`tools.github.app` with more workflow permissions than the App has** — causes HTTP 422 on token creation
+15. **`tools.github` alongside `gh` CLI in bash** — MCP server takes GITHUB_TOKEN ownership, blocking `gh` auth
+16. **`add-comment` without `discussions: false`** — silently requests `discussions:write`, fails if App lacks it
+17. **`${{ }}` expressions inside fenced code blocks** — not interpolated, agent gets literal strings
+18. **Standard `.yml` files in `.github/workflows/`** alongside gh-aw workflows — blocks App token pushes
+19. **Double quotes in MCP `entrypointArgs`** — `gh aw compile` doesn't escape them, producing broken JSON
+20. **MCP server stdout before JSON-RPC handshake** — breaks gateway init; redirect install output to /dev/null
+
+## Production Gotchas Reference
+
+For detailed explanations, symptoms, and fixes for each production gotcha, refer to `references/production-gotchas.md`. This covers:
+- Expression interpolation in code blocks
+- GitHub App token permission inheritance
+- `tools.github` vs `gh` CLI conflicts
+- Safe-output hidden defaults (`add-comment` discussions)
+- Missing merge safe-output (use `post-steps` instead)
+- Write permission compiler rejection
+- `.lock.yml` workflow push exemption
+- `if:` frontmatter guard
+- `post-steps:` feature
+- MCP JSON escaping and stdout constraints
+- `gh aw mcp inspect/list` import limitation
+- `pull_request` trigger merge ref timing

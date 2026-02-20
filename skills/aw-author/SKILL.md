@@ -110,27 +110,26 @@ Options:
 For each selected safe-output, prompt for constraints:
 - **add-labels:** "Which labels are allowed?" → `allowed: [list]`
 - **create-issue:** "Title prefix? Auto-close older?" → `title-prefix`, `close-older-issues`
-- **add-comment:** "Hide older comments?" → `hide-older-comments: true`
+- **add-comment:** "Hide older comments?" → `hide-older-comments: true`. **Always add `discussions: false`** unless the workflow explicitly uses discussions — `add-comment` defaults to requesting `discussions:write`, which causes HTTP 422 if the App lacks that permission
 - **create-pull-request:** "Draft mode? Reviewers?" → `draft: true`, `reviewers: [list]`
+
+**No merge safe-output exists.** If the workflow needs to merge PRs, use `post-steps:` with a fresh App token. See `references/production-gotchas.md` for the pattern.
 
 Refer to `references/safe-outputs.md` for the full catalog of safe-output types and parameters.
 
 ### Phase 5: Security & Permissions
 
-Derive minimal permissions from the selected tools and safe-outputs:
+Derive minimal **read-only** permissions from the selected tools and safe-outputs. **Write permissions are NOT allowed in frontmatter** — the compiler rejects them. All write operations go through safe-outputs.
 
 | Component | Required Permission |
 |-----------|-------------------|
 | Read issues | `issues: read` |
-| Add labels / comments / close | `issues: write` |
 | Read PRs | `pull-requests: read` |
-| Create/update PRs | `pull-requests: write` |
-| Push to PR branch | `contents: write` |
 | Read code / files | `contents: read` |
-| Discussions | `discussions: read` or `write` |
-| Code scanning | `security-events: write` |
-| Dispatch workflows | `actions: write` |
+| Discussions | `discussions: read` |
 | Workflow introspection | `actions: read` |
+
+Write operations (labels, comments, PRs, etc.) are handled entirely by safe-outputs using the App token — no `write` permissions needed in `permissions:`.
 
 Ask about security posture:
 
@@ -176,6 +175,8 @@ Use expression syntax for dynamic values:
 - `${{ github.event }}` — trigger event payload
 - `${{ secrets.NAME }}` — secret references
 - `${{ vars.NAME }}` — variable references
+
+**Code block interpolation warning:** `${{ }}` expressions in plain text ARE interpolated, but expressions inside fenced code blocks (` ```bash `, etc.) are NOT interpolated — the agent receives them as literal strings. If bash code blocks need event data, declare env vars in plain text (e.g., `ISSUE_NUMBER` from `${{ github.event.issue.number }}`) and use `$ISSUE_NUMBER` in code blocks. See `references/production-gotchas.md` for details.
 
 ### Phase 8: Assembly & Compilation
 
@@ -327,6 +328,10 @@ If compilation succeeds (or the user reports a runtime/behavioral issue):
    - Check network access if external calls needed
    - Check safe-output constraints aren't too restrictive
    - Check MCP server configuration (env vars, args, container image)
+   - **Check `tools.github.app` permission inheritance** — App token requests ALL workflow permissions, not just what MCP needs
+   - **Check `tools.github` vs `gh` CLI conflict** — MCP server takes ownership of GITHUB_TOKEN, blocking `gh` CLI auth
+   - **Check `add-comment` discussions default** — requests `discussions:write` even if unused; add `discussions: false`
+   - **Check `.lock.yml` vs `.yml` push restriction** — standard `.yml` files block App token pushes
 
 2. **Behavioral error** — the workflow runs but produces wrong results:
    - Review prose instructions for ambiguity
@@ -334,6 +339,7 @@ If compilation succeeds (or the user reports a runtime/behavioral issue):
    - Check tool selection matches the task
    - Review safe-output allowlists for missing values
    - Check for `event.json` fallback if event context is missing
+   - **Check code block interpolation** — `${{ }}` in fenced code blocks are NOT interpolated; agent gets literal strings
 
 ### Step 3: Gather Context
 
@@ -342,7 +348,7 @@ Ask the user to provide:
 - Error messages or logs (from GitHub Actions)
 - Expected vs actual behavior
 
-Use `references/validation.md` for the error catalog and common fixes.
+Use `references/validation.md` for the error catalog and `references/production-gotchas.md` for runtime gotchas verified through production debugging.
 
 ---
 
@@ -358,6 +364,7 @@ For questions about:
 - **Body writing** → refer to `references/markdown-body.md`
 - **Errors and debugging** → refer to `references/validation.md`
 - **Examples** → refer to `references/examples.md`
+- **Runtime gotchas, App tokens, MCP pitfalls** → refer to `references/production-gotchas.md`
 
 For questions not covered by embedded references, fetch the latest spec:
 - Full spec: `https://github.github.com/gh-aw/llms-full.txt`
@@ -374,7 +381,7 @@ These rules apply across ALL modes:
 1. **Trigger field is `issues` (plural), not `issue`** — this is the most common mistake
 2. **Event-triggered workflows need `reaction: eyes`** in the `on:` block for pre_activation permissions
 3. **Safe-outputs are the ONLY way to write** — the agent itself is read-only
-4. **Permissions must match** — every safe-output type requires specific permission scopes
+4. **Write permissions are NOT allowed in frontmatter** — the compiler rejects `write` in `permissions:`; all writes go through safe-outputs using the App token
 5. **`strict: false` is required** when processing untrusted/external input (public repo issues)
 6. **Bash defaults are safe** — only `echo`, `ls`, `pwd`, `cat`, `head`, `tail`, `grep`, `wc`, `sort`, `uniq`, `date`
 7. **GitHub toolsets default** to `[context, repos, issues, pull_requests]` in Actions
@@ -387,3 +394,15 @@ These rules apply across ALL modes:
 14. **`strict: false` is also required for custom API domains** — ecosystem identifiers (`defaults`, `github`, `containers`, `node`, `python`) work in strict mode, but custom domains like `*.datadoghq.com` require `strict: false`
 15. **Add `node` and `python` ecosystems** when MCP servers use `npx` or `uvx` — these ecosystems allow package registry access (npm, PyPI) needed for process-based MCP servers
 16. **MCP gateway logs are the primary debug source** — when MCP tool calls return vague errors (e.g., "no data found"), download `agent-artifacts/mcp-logs/{server}.log` from the workflow run to see the real error (TLS failures, auth errors, timeouts)
+17. **`${{ }}` expressions in fenced code blocks are NOT interpolated** — they are passed as literal strings to the agent; use env vars in code blocks instead (see `references/production-gotchas.md`)
+18. **`tools.github.app` requests ALL workflow permissions** — if the App lacks any permission in the `permissions:` block (e.g., `packages: read`), the App token creation fails with HTTP 422; omit `app:` for read-only MCP access
+19. **`tools.github` conflicts with `gh` CLI** — the MCP server takes ownership of GITHUB_TOKEN; if workflow only uses `gh` CLI via bash, remove `tools.github` entirely
+20. **`add-comment` defaults to `discussions:write`** — always add `discussions: false` under `add-comment:` unless discussions are explicitly needed, or the App token fails with HTTP 422
+21. **No `merge-pull-request` safe-output exists** — use `post-steps:` with a fresh App token to merge PRs
+22. **`.lock.yml` files are exempt from workflow push restrictions** — standard `.yml`/`.yaml` files block App token pushes in `.github/workflows/`; never mix standard GH Actions `.yml` files with gh-aw workflows if using App tokens for safe-outputs
+23. **Frontmatter `if:` guard** prevents workflow runs from starting entirely — evaluated before any jobs run, saves compute vs job-level guards
+24. **`post-steps:` runs after AI execution** — has access to job context (`${{ github.event.* }}`, secrets, vars); use for merging PRs, closing issues, cleanup requiring App tokens
+25. **`gh aw compile` does NOT escape `"` in entrypointArgs** — never use double quotes in MCP server command strings; use `grep` instead of `jq` if the expression would contain quotes
+26. **MCP server stdout breaks initialization** — any stdout before the JSON-RPC handshake breaks the MCP gateway; redirect all `apk add`, `pip install`, `curl` output to `/dev/null`
+27. **`gh aw mcp inspect/list` does NOT follow `imports:`** — only sees servers in direct frontmatter; check compiled `.lock.yml` to verify imported servers
+28. **`pull_request` trigger uses the merge commit workflow** — if you push a new lock.yml to main and immediately re-trigger a PR, the merge ref may use the old main; wait briefly between pushes and PR events

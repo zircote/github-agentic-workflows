@@ -139,6 +139,34 @@ You are analyzing issue #${{ github.event.issue.number }} in ${{ github.reposito
 The issue was created by @${{ github.event.issue.user.login }}.
 ```
 
+### Code Block Interpolation (CRITICAL)
+
+`${{ }}` expressions in **plain text** are interpolated at compile time. However, expressions inside **fenced code blocks** (` ```bash `, ` ```yaml `, etc.) are **NOT** interpolated — they are passed to the agent as literal strings.
+
+**If the agent receives `${{ github.event.issue.number }}` as a literal string in a bash code block, bash cannot parse `${{` and the command fails silently.**
+
+**Fix:** Declare dynamic values as environment variables in plain text, then reference them in code blocks:
+
+```markdown
+The issue number is `${{ github.event.issue.number }}`. Use this value as `$ISSUE_NUMBER` in commands.
+```
+
+Then in code blocks:
+
+````markdown
+```bash
+gh issue view "$ISSUE_NUMBER"
+```
+````
+
+**Do NOT do this:**
+
+````markdown
+```bash
+gh issue view ${{ github.event.issue.number }}
+```
+````
+
 ### `event.json` Fallback
 
 When `${{ github.event }}` is unavailable or incomplete, agents should check for an `event.json` file in the workspace root as a fallback source for event context.

@@ -166,6 +166,20 @@ tools:
 
 **Token precedence:** GitHub App → `github-token` → `GH_AW_GITHUB_MCP_SERVER_TOKEN` → `GH_AW_GITHUB_TOKEN` → `GITHUB_TOKEN`
 
+### App Token Permission Inheritance (CRITICAL)
+
+When using `tools.github.app`, the GitHub MCP server requests **ALL** workflow-level permissions for the App token — not just the ones MCP tools need. If the workflow has `packages: read` (e.g., for GHCR docker login in `steps:`) but the GitHub App doesn't have Packages permission, the App token creation fails with HTTP 422.
+
+**Rule:** Only use `tools.github.app` when the GitHub App has **every** permission declared in the workflow's `permissions:` block. For read-only MCP access, omit `app:` and use the default `GITHUB_TOKEN`.
+
+### gh CLI Authentication Conflict (CRITICAL)
+
+When `tools.github` is configured, the GitHub MCP server takes ownership of `GITHUB_TOKEN`. This prevents the `gh` CLI from authenticating in bash tool calls.
+
+**Symptom:** Agent reports `"Detected conflict with gh CLI authentication"` or `"missing tool"`.
+
+**Fix:** If the workflow only uses `gh` CLI via bash (not GitHub MCP tools), remove `tools.github` entirely from frontmatter. The `gh` CLI authenticates directly with `GITHUB_TOKEN`.
+
 ---
 
 ## Playwright Tool (`playwright:`)
