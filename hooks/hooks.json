@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/check-workflow-edit.sh",
+            "statusMessage": "Checking gh-aw workflow status..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/check-uncompiled-workflows.sh",
+            "statusMessage": "Checking for uncompiled gh-aw workflows..."
+          }
+        ]
+      }
+    ]
+  }
+}
