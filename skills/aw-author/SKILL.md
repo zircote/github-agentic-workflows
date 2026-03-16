@@ -66,9 +66,10 @@ Options:
   - "Copilot (GitHub native, default)" → engine.id: copilot
   - "Claude (Anthropic, strong reasoning)" → engine.id: claude
   - "Codex (OpenAI, code-focused)" → engine.id: codex
+  - "Custom (bring your own engine)" → engine.id: custom
 ```
 
-Configure engine settings: `max-turns`, `timeout-minutes`, `thinking`.
+Configure engine settings: `max-turns`, `timeout-minutes`, `thinking`, `model`.
 
 ### Phase 3: Tool Selection
 
@@ -80,6 +81,7 @@ Options:
   - "File editing" → tools.edit
   - "Web fetch / search" → tools.web-fetch, tools.web-search
   - "Browser automation (Playwright)" → tools.playwright
+  - "Semantic code analysis (Serena)" → tools.serena
   - "Memory (cache/repo)" → tools.cache-memory, tools.repo-memory
 ```
 
@@ -98,12 +100,22 @@ bash: ["echo", "ls", "cat", "grep", "jq", "git:*"]
 AskUserQuestion: "What write operations should the workflow perform?" (multi-select)
 Options:
   - "Add labels to issues/PRs" → add-labels
+  - "Remove labels" → remove-labels
   - "Add comments" → add-comment
   - "Create new issues" → create-issue
-  - "Create pull requests" → create-pull-request
+  - "Update issues" → update-issue
   - "Close issues" → close-issue
+  - "Create pull requests" → create-pull-request
+  - "Update pull requests" → update-pull-request
+  - "Close pull requests" → close-pull-request
+  - "Push to PR branch" → push-to-pull-request-branch
+  - "PR review comments" → create-pull-request-review-comment
+  - "Submit PR review" → submit-pull-request-review
+  - "Create discussions" → create-discussion
   - "Assign users" → assign-to-user
+  - "Add reviewers" → add-reviewer
   - "Dispatch other workflows" → dispatch-workflow
+  - "Upload assets" → upload-asset
   - "None (read-only)" → no safe-outputs
 ```
 
@@ -152,11 +164,20 @@ Options:
   - "Yes, unrestricted" → network: true (discouraged)
 ```
 
-If specific domains, prompt for the list:
+If specific domains, prompt for the list. Use **ecosystem identifiers** for common bundles (these work in `strict: true` mode):
+- `defaults` — localhost, 127.0.0.1
+- `github` — GitHub and related domains
+- `containers` — container registries
+- `node` — npm, Node.js ecosystem (required for `npx`-based MCP servers)
+- `python` — PyPI, Python ecosystem (required for `uvx`-based MCP servers)
+
+Custom domains require `strict: false`.
+
 ```yaml
 network:
   firewall:
     allowed:
+      - "node"
       - "api.example.com"
 ```
 
@@ -399,10 +420,11 @@ These rules apply across ALL modes:
 19. **`tools.github` conflicts with `gh` CLI** — the MCP server takes ownership of GITHUB_TOKEN; if workflow only uses `gh` CLI via bash, remove `tools.github` entirely
 20. **`add-comment` defaults to `discussions:write`** — always add `discussions: false` under `add-comment:` unless discussions are explicitly needed, or the App token fails with HTTP 422
 21. **No `merge-pull-request` safe-output exists** — use `post-steps:` with a fresh App token to merge PRs
-22. **`.lock.yml` files are exempt from workflow push restrictions** — standard `.yml`/`.yaml` files block App token pushes in `.github/workflows/`; never mix standard GH Actions `.yml` files with gh-aw workflows if using App tokens for safe-outputs
-23. **Frontmatter `if:` guard** prevents workflow runs from starting entirely — evaluated before any jobs run, saves compute vs job-level guards
-24. **`post-steps:` runs after AI execution** — has access to job context (`${{ github.event.* }}`, secrets, vars); use for merging PRs, closing issues, cleanup requiring App tokens
-25. **`gh aw compile` does NOT escape `"` in entrypointArgs** — never use double quotes in MCP server command strings; use `grep` instead of `jq` if the expression would contain quotes
-26. **MCP server stdout breaks initialization** — any stdout before the JSON-RPC handshake breaks the MCP gateway; redirect all `apk add`, `pip install`, `curl` output to `/dev/null`
-27. **`gh aw mcp inspect/list` does NOT follow `imports:`** — only sees servers in direct frontmatter; check compiled `.lock.yml` to verify imported servers
-28. **`pull_request` trigger uses the merge commit workflow** — if you push a new lock.yml to main and immediately re-trigger a PR, the merge ref may use the old main; wait briefly between pushes and PR events
+22. **`call-workflow` is for compile-time fan-out** — unlike `dispatch-workflow` (runtime dispatch), `call-workflow` inlines reusable workflows at compile time
+23. **`.lock.yml` files are exempt from workflow push restrictions** — standard `.yml`/`.yaml` files block App token pushes in `.github/workflows/`; never mix standard GH Actions `.yml` files with gh-aw workflows if using App tokens for safe-outputs
+24. **Frontmatter `if:` guard** prevents workflow runs from starting entirely — evaluated before any jobs run, saves compute vs job-level guards
+25. **`post-steps:` runs after AI execution** — has access to job context (`${{ github.event.* }}`, secrets, vars); use for merging PRs, closing issues, cleanup requiring App tokens
+26. **`gh aw compile` does NOT escape `"` in entrypointArgs** — never use double quotes in MCP server command strings; use `grep` instead of `jq` if the expression would contain quotes
+27. **MCP server stdout breaks initialization** — any stdout before the JSON-RPC handshake breaks the MCP gateway; redirect all `apk add`, `pip install`, `curl` output to `/dev/null`
+28. **`gh aw mcp inspect/list` does NOT follow `imports:`** — only sees servers in direct frontmatter; check compiled `.lock.yml` to verify imported servers
+29. **`pull_request` trigger uses the merge commit workflow** — if you push a new lock.yml to main and immediately re-trigger a PR, the merge ref may use the old main; wait briefly between pushes and PR events

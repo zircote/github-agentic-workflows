@@ -85,6 +85,8 @@ tools:
 
 Search the web. Engine-dependent; may require third-party MCP servers depending on engine selection.
 
+**Note:** Disabled by default for Codex engine; requires explicit declaration.
+
 ---
 
 ## GitHub Tools (`github:`)
@@ -98,6 +100,8 @@ tools:
     read-only: true                            # Restrict to read operations
     lockdown: true                             # Force security filtering
     github-token: "${{ secrets.CUSTOM_PAT }}"  # Custom token
+    allowed: ["get_issue", "list_issues"]      # Restrict API functions
+    version: "latest"                          # Server version override
 ```
 
 ### Toolsets — Complete List
@@ -214,6 +218,51 @@ Requires Docker with appropriate security flags for GitHub Actions compatibility
 
 ---
 
+## Serena Tool (`serena:`)
+
+```yaml
+tools:
+  serena: ["go", "typescript"]
+```
+
+Semantic code analysis via language server integration. Supports multiple languages with per-language configuration.
+
+### Language List Format
+
+```yaml
+tools:
+  serena: ["go", "typescript", "python"]
+```
+
+### Object Format
+
+```yaml
+tools:
+  serena:
+    version: "latest"
+    mode: docker
+    languages:
+      go:
+        version: "1.22"
+        go-mod-file: "go.mod"
+        gopls-version: "latest"
+      typescript:
+        version: "20"
+      python:
+        version: "3.12"
+```
+
+| Sub-field | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `version` | string | — | MCP version |
+| `mode` | string | `docker` | `docker` or `local` |
+| `args` | array | — | Additional arguments |
+| `languages` | mapping | — | Per-language configuration |
+
+**Supported languages:** `go`, `typescript`, `python`, `java`, `rust`, `csharp`
+
+---
+
 ## Built-in MCP Tools
 
 ### Agentic Workflows (`agentic-workflows:`)
@@ -236,6 +285,28 @@ tools:
 
 Persistent memory across workflow runs. Useful for tracking trends, historical data, and maintaining context between executions.
 
+**Object format with advanced configuration:**
+
+```yaml
+tools:
+  cache-memory:
+    key: "triage-state"
+    description: "Tracks triaged issues"
+    retention-days: 30
+    scope: workflow
+    restore-only: false
+    allowed-extensions: [".json", ".md", ".txt"]
+```
+
+| Sub-field | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `key` | string | auto | Custom cache key |
+| `description` | string | — | Cache description |
+| `retention-days` | integer | — | 1-90 days |
+| `restore-only` | boolean | `false` | Read-only access |
+| `scope` | string | `workflow` | `workflow` or `repo` |
+| `allowed-extensions` | array | `[".json", ".jsonl", ".txt", ".md", ".csv"]` | Allowed file types |
+
 ### Repo Memory (`repo-memory:`)
 
 ```yaml
@@ -244,6 +315,57 @@ tools:
 ```
 
 Repository-scoped memory for maintaining context specific to a repository across executions.
+
+**Object format with advanced configuration:**
+
+```yaml
+tools:
+  repo-memory:
+    branch-prefix: "memory"
+    target-repo: "org/shared-memory"
+    max-file-size: 10240
+    max-file-count: 100
+    create-orphan: true
+    allowed-extensions: [".json", ".md"]
+```
+
+| Sub-field | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `branch-prefix` | string | — | 4-32 chars, alphanumeric |
+| `target-repo` | string | — | `owner/repo` format |
+| `branch-name` | string | — | Custom branch name |
+| `file-glob` | string/array | — | Glob patterns |
+| `max-file-size` | integer | `10240` | Max bytes per file |
+| `max-file-count` | integer | `100` | Max files |
+| `description` | string | — | Memory description |
+| `create-orphan` | boolean | `true` | Create orphan branch |
+| `allowed-extensions` | array | — | Allowed file types |
+
+---
+
+## Tool-Level Settings
+
+### `timeout`
+
+```yaml
+tools:
+  timeout: 120
+```
+
+- **Type:** integer (seconds)
+- **Default:** engine-specific
+- **Description:** Tool-level timeout in seconds for all tool calls.
+
+### `startup-timeout`
+
+```yaml
+tools:
+  startup-timeout: 180
+```
+
+- **Type:** integer (seconds)
+- **Default:** `120`
+- **Description:** Maximum time for tool/MCP server startup.
 
 ---
 

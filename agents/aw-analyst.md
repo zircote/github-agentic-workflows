@@ -123,6 +123,8 @@ When analyzing, validate against the authoritative spec. If the embedded skill r
 18. **Standard `.yml` files in `.github/workflows/`** alongside gh-aw workflows — blocks App token pushes
 19. **Double quotes in MCP `entrypointArgs`** — `gh aw compile` doesn't escape them, producing broken JSON
 20. **MCP server stdout before JSON-RPC handshake** — breaks gateway init; redirect install output to /dev/null
+21. **`call-workflow` vs `dispatch-workflow` confusion** — `call-workflow` is compile-time fan-out (inlined), `dispatch-workflow` is runtime dispatch
+22. **Missing `serena` tool** when prose references semantic code analysis — add `tools: serena: ["language"]`
 
 ## Production Gotchas Reference
 
