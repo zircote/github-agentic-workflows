@@ -159,7 +159,7 @@ After all phases complete (or on early exit), print a summary:
 │ gh-aw:       {before} → {after}     │
 │ Workflows:   {N} compiled           │
 │ Validation:  ✓ passed               │
-│ PR:          {url}                   │
+│ PR:          {url}                  │
 │ Merged:      yes/no/skipped         │
 └─────────────────────────────────────┘
 ```
@@ -173,66 +173,99 @@ The `gh aw upgrade --create-pull-request` flag already handles the upgrade + PR
 creation natively within gh-aw. This is the recommended path for CI automation
 rather than reimplementing the logic.
 
-#### Recommended workflow: `.github/workflows/gh-aw-upgrade.lock.yml`
+#### Recommended workflow: `.github/workflows/gh-aw-upgrade.md`
 
-Source as a gh-aw markdown workflow or a plain YAML workflow:
+This is a gh-aw markdown workflow. Compile it with `gh aw compile` to produce
+the `.lock.yml` that GitHub Actions executes.
 
-```yaml
-name: gh-aw Upgrade Check
+````markdown
+---
+name: "gh-aw Auto-Upgrade"
+description: "Upgrade gh-aw extension, recompile workflows, and open a PR with changes"
+timeout-minutes: 10
+
 on:
-  schedule:
-    - cron: '0 8 * * 1'  # Weekly Monday 8am UTC
+  schedule: "weekly on monday around 08:00"
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force upgrade even if on latest'
+        description: "Force upgrade even if on latest version"
+        required: false
         type: boolean
-        default: false
 
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
 
-jobs:
-  upgrade:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+engine:
+  id: copilot
 
-      - name: Install gh-aw
-        run: gh extension install github/gh-aw
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+tools:
+  bash: ["gh:*", "echo", "awk"]
 
-      - name: Record version before
-        id: before
-        run: echo "version=$(gh aw version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+safe-outputs:
+  create-pull-request:
+    max: 1
+    labels: [dependencies, ci]
+---
 
-      - name: Upgrade gh-aw extension
-        run: gh extension upgrade github/gh-aw --force
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# gh-aw Auto-Upgrade Agent
 
-      - name: Record version after
-        id: after
-        run: echo "version=$(gh aw version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+## Context
 
-      - name: Upgrade repository workflows and create PR
-        if: steps.before.outputs.version != steps.after.outputs.version || inputs.force
-        run: gh aw upgrade --create-pull-request --verbose
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+You are performing an automated gh-aw extension upgrade on ${{ github.repository }}.
+This workflow runs weekly on Monday mornings, or on-demand via workflow dispatch.
 
-      - name: Auto-merge PR
-        if: steps.before.outputs.version != steps.after.outputs.version || inputs.force
-        run: |
-          PR_URL=$(gh pr list --head "gh-aw-upgrade" --json url --jq '.[0].url' 2>/dev/null)
-          if [ -n "$PR_URL" ]; then
-            gh pr merge "$PR_URL" --squash --auto --delete-branch
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+The force input is: `${{ github.event.inputs.force }}`. Use this as `$FORCE_INPUT` in commands.
+
+## Instructions
+
+1. Install the gh-aw extension if not present:
+
+```bash
+gh extension install github/gh-aw 2>/dev/null || true
 ```
+
+2. Record the **before** version:
+
+```bash
+BEFORE_VERSION=$(gh aw version | awk '{print $NF}')
+echo "Before version: $BEFORE_VERSION"
+```
+
+3. Upgrade the gh-aw extension:
+
+```bash
+gh extension upgrade github/gh-aw --force
+```
+
+4. Record the **after** version:
+
+```bash
+AFTER_VERSION=$(gh aw version | awk '{print $NF}')
+echo "After version: $AFTER_VERSION"
+```
+
+5. Compare versions:
+   - If versions are identical **and** `$FORCE_INPUT` is not `true`: report "gh-aw is already on the latest version. No upgrade needed." and **stop**.
+   - If versions differ or force is `true`: continue to step 6.
+
+6. Run the upgrade and create a PR using the native gh-aw flag:
+
+```bash
+gh aw upgrade --create-pull-request --verbose
+```
+
+This handles branch creation, recompilation, commit, and PR creation in one command.
+
+7. Report the result: before version, after version, and the PR URL if one was created.
+
+## Edge Cases
+
+- If `gh aw upgrade --create-pull-request` reports no changes, it will not create a PR. Report "No workflow changes after upgrade. Repo is already current." and stop.
+- If the upgrade fails, report the error output clearly and stop.
+- If a PR already exists from a previous run, gh-aw will update it or skip — this is safe to re-run.
+````
 
 #### Key considerations:
 
@@ -244,14 +277,14 @@ jobs:
    provisioning via GPM, use a GitHub App token with `contents: write` and
    `pull-requests: write` on target repos.
 
-3. **GPM provisioning**: This workflow YAML can be deployed across repos using
+3. **GPM provisioning**: This workflow `.md` can be deployed across repos using
    the GPM `gpm-workflows-deploy` skill. Add it to gpm-config.yml under
-   `workflows:` and GPM will push it to all managed repos.
+   `workflows:` and GPM will push it to all managed repos. Then run
+   `gh aw compile` in each repo to produce the `.lock.yml`.
 
-4. **Alternative: gh-aw native workflow**: Write this as a gh-aw `.md`
-   workflow that triggers on schedule, uses bash tools to run `gh extension
-   upgrade` and `gh aw upgrade --create-pull-request`. This keeps the
-   automation within the gh-aw ecosystem.
+4. **Compilation**: After writing the `.md` file, run `gh aw compile` to
+   produce `.github/workflows/gh-aw-upgrade.lock.yml`. The `.lock.yml` is
+   what GitHub Actions executes — never edit it directly.
 
 5. **Branch naming**: `gh aw upgrade --create-pull-request` creates its own
    branch name. Check `gh aw upgrade --help` for any `--branch` flag in
@@ -260,4 +293,8 @@ jobs:
 6. **Idempotency**: The workflow is safe to re-run. If no changes result
    from `gh aw upgrade`, no PR is created. If a PR already exists, gh-aw
    will update it or skip.
+
+7. **Auto-merge**: There is no `merge-pull-request` safe-output in gh-aw.
+   If auto-merge is needed, add `post-steps` with an App token to merge
+   the PR after the agent completes.
 -->
