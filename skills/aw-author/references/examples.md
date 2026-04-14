@@ -2,6 +2,8 @@
 
 Complete gh-aw workflow examples with annotated frontmatter and prose body.
 
+> **Convention:** All `add-comment` safe-outputs include `discussions: false`. Omitting this causes HTTP 422 errors when the GitHub App lacks Discussions permission. See `production-gotchas.md` for details.
+
 ---
 
 ## Example 1: Issue Triage Agent
@@ -38,6 +40,7 @@ safe-outputs:
     allowed: [bug, feature, enhancement, documentation, question, good-first-issue]
     max: 3
   add-comment:
+    discussions: false
     max: 1
 ---
 
@@ -187,6 +190,7 @@ safe-outputs:
     allowed: [bug, feature, enhancement, priority-high, priority-low, planned, wontfix]
     max: 5
   add-comment:
+    discussions: false
     hide-older-comments: true
     max: 1
   create-issue:
@@ -344,6 +348,7 @@ safe-outputs:
     target-repo: "org/upstream-repo"
     max: 1
   add-comment:
+    discussions: false
     max: 1
   add-labels:
     allowed: [synced]
@@ -404,6 +409,7 @@ tools:
 
 safe-outputs:
   add-comment:
+    discussions: false
     max: 1
 ---
 

@@ -138,6 +138,7 @@ The workflow runs but produces incorrect or unexpected results.
 | `${{ }}` expressions inside fenced code blocks | Agent gets literal strings, bash fails | Declare env vars in plain text, use `$VAR` in code blocks |
 | Double quotes in MCP `entrypointArgs` | Broken JSON in compiled lock file | Avoid `"` in command strings; use `grep` instead of `jq` with quotes |
 | MCP server printing to stdout before handshake | Server silently fails to initialize | Redirect all install/setup output to `/dev/null` |
+| Using deprecated `plugins:` field | `plugins:` deprecated since early 2026; APM-backed `dependencies:` is current | Replace with `dependencies:` field; run `gh aw fix --write` to auto-migrate |
 
 ### Prose Anti-Patterns
 
@@ -202,6 +203,7 @@ When a workflow fails, check in this order:
 - [ ] If workflow uses both `tools.github` and `gh` CLI via bash, check for token ownership conflicts — choose one approach
 - [ ] If workflow pushes branches or creates PRs, ensure no standard `.yml`/`.yaml` files exist in `.github/workflows/` — only `.lock.yml` files are exempt from the App token workflow push restriction
 - [ ] `permissions:` block contains only `read` values — compiler rejects `write` permissions
+- [ ] If workflow uses `plugins:` field — migrate to `dependencies:` using `gh aw fix --write`
 
 ### 8. Runtime
 - [ ] Timeout sufficient for task complexity
@@ -210,6 +212,7 @@ When a workflow fails, check in this order:
 - [ ] No conflicting workflows on same trigger
 - [ ] `pull_request` trigger has stable merge ref — allow time between pushes to main and PR re-triggers
 - [ ] Frontmatter `if:` guard scopes workflow runs to intended events (saves compute)
+- [ ] If repo requires signed commits via branch rulesets — gh-aw now signs commits on new branches automatically (no special configuration needed; fixed in early 2026)
 
 ### 9. MCP Server Diagnostics
 - [ ] Download `agent-artifacts/mcp-logs/{server}.log` from workflow run to see real errors (tool error messages can be misleading)

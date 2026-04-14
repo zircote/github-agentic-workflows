@@ -1,7 +1,7 @@
 {
   "name": "aw-author",
-  "version": "1.0.1",
-  "description": "Guided authoring, validation, and refinement of GitHub Agentic Workflow (gh-aw) markdown files. Supports interactive guided mode, one-shot generation, validation via gh aw compile, improvement analysis, and debugging.",
+  "version": "1.2.0",
+  "description": "Guided authoring, validation, and refinement of GitHub Agentic Workflow (gh-aw) markdown files. Includes daily ecosystem intelligence reporting, knowledge base management, and GitHub Discussions integration. Supports interactive guided mode, one-shot generation, validation via gh aw compile, improvement analysis, debugging, intelligence sweeps, and status briefings.",
   "author": {
     "name": "Robert Allen",
     "email": "zircote@gmail.com"
@@ -13,6 +13,8 @@
     "gh-aw",
     "agentic-workflows",
     "github-actions",
-    "workflow-authoring"
+    "workflow-authoring",
+    "intelligence-reporting",
+    "ecosystem-monitoring"
   ]
 }

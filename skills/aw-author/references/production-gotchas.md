@@ -327,3 +327,49 @@ The `pull_request` trigger uses the workflow definition from the **merge commit*
 **Fix:** Wait a few seconds between pushing to `main` and triggering `pull_request` events. If testing workflow changes, close and reopen the PR (or push a new commit to the PR branch) to force a merge ref rebuild.
 
 **Related:** For `push` triggers, the workflow is always from the pushed commit. For `workflow_dispatch`, it's from the branch selected in the UI.
+
+---
+
+## Dependencies System Migration
+
+### `plugins:` Field Deprecated → Use `dependencies:`
+
+The `plugins:` frontmatter field is **deprecated** as of early 2026, replaced by `dependencies:` backed by the Agent Package Manager (APM).
+
+**Symptom:** `gh aw compile` emits a deprecation warning when `plugins:` is used. Future compiler versions may reject it.
+
+**Fix:**
+
+```bash
+gh aw fix --write
+```
+
+This auto-migrates all workflow files in `.github/workflows/`.
+
+**Before (deprecated):**
+
+```yaml
+plugins:
+  - "org/plugin-repo"
+```
+
+**After (current):**
+
+```yaml
+dependencies:
+  - "org/plugin-repo"
+```
+
+---
+
+## Signed Commits on New Branches
+
+### Branch Rulesets Requiring Signatures
+
+Repositories with branch protection rulesets that require **signed commits** now work correctly with gh-aw safe-outputs that create branches (`push-to-pull-request-branch`, `create-pull-request`).
+
+**Previous behavior:** gh-aw failed to push to new branches in repos requiring signed commits — App token pushes were unsigned.
+
+**Current behavior (early 2026+):** gh-aw correctly signs commits on newly created branches. No configuration change needed.
+
+**Edge case:** Custom tokens (`github-token:` in safe-outputs) using a different App identity may still require signing configuration on the target App.

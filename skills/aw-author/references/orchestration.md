@@ -285,6 +285,22 @@ safe-outputs:
 
 ---
 
+## Engine Model Selection
+
+When specifying `engine.model`, the following values are available as of Copilot CLI GA (February 25, 2026):
+
+| Engine | Model Value | Description |
+|--------|------------|-------------|
+| `copilot` | `claude-opus` | Claude Opus 4.6 — highest reasoning capability |
+| `copilot` | `claude-sonnet` | Claude Sonnet 4.6 — balanced speed/capability |
+| `copilot` | `gpt-5-codex` | GPT-5.3-Codex — code-optimized |
+| `copilot` | `gemini-pro` | Gemini 3 Pro — multimodal |
+| `claude` | *(default)* | Claude Sonnet 4.6 via direct Anthropic API |
+
+For reasoning-heavy patterns (security review, complex triage), prefer `claude-opus` or enable `thinking: true` with the `claude` engine.
+
+---
+
 ## Choosing a Pattern
 
 | Scenario | Recommended Pattern |

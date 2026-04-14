@@ -31,6 +31,7 @@ gh-aw workflow files use YAML frontmatter delimited by `---` markers. This is th
 | `create-project-status-update` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#create-project-status-update) |
 | `create-pull-request` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#create-pull-request) |
 | `create-pull-request-review-comment` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#create-pull-request-review-comment) |
+| `dependencies` | [Imports & Dependencies](#10-imports--dependencies) | [link](#dependencies) |
 | `description` | [Workflow Identity](#1-workflow-identity) | [link](#description) |
 | `dispatch-workflow` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#dispatch-workflow) |
 | `edit` | [Tools](#5-tools-tools) | [link](#edit-tool) |
@@ -53,7 +54,7 @@ gh-aw workflow files use YAML frontmatter delimited by `---` markers. This is th
 | `on` | [Triggers](#2-triggers-on) | [link](#on) |
 | `permissions` | [Permissions](#3-permissions-permissions) | [link](#permissions) |
 | `playwright` | [Tools](#5-tools-tools) | [link](#playwright-tool) |
-| `plugins` | [Imports & Dependencies](#10-imports--dependencies) | [link](#plugins) |
+| `plugins` | [Imports & Dependencies](#10-imports--dependencies) | [link](#plugins) *(deprecated)* |
 | `post-steps` | [Steps & Post-Steps](#8-steps--post-steps) | [link](#post-steps) |
 | `push-to-pull-request-branch` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#push-to-pull-request-branch) |
 | `reaction` | [Triggers](#2-triggers-on) | [link](#reaction) |
@@ -340,6 +341,8 @@ on:
     events: ["issue_comment", "pull_request_review_comment"]
 ```
 
+> **Bot comment activation:** Slash commands are also triggered by bot-authored comments (e.g., a workflow posting a `/command` comment to chain automation). The slash command handler does not filter by author type, so bot comments activate `slash_command` workflows the same as human comments. Use `lockdown:` to restrict trust boundaries if needed.
+
 #### `workflow_dispatch`
 
 - **Type:** null | object
@@ -604,6 +607,19 @@ engine:
 | Claude | `claude` | `ANTHROPIC_API_KEY` |
 | Codex | `codex` | `OPENAI_API_KEY` |
 | Custom | `custom` | Depends on implementation |
+
+#### Available Models (Copilot CLI GA — February 25, 2026)
+
+The `model:` sub-field accepts these values when using the `copilot` engine:
+
+| Model Value | Engine | Description |
+|-------------|--------|-------------|
+| `claude-opus` | Opus 4.6 | Highest-capability Anthropic model |
+| `claude-sonnet` | Sonnet 4.6 | Balanced speed and capability |
+| `gpt-5-codex` | GPT-5.3-Codex | OpenAI code-specialized model |
+| `gemini-pro` | Gemini 3 Pro | Google multimodal model |
+
+Model availability depends on Copilot subscription tier and organization policy. The `claude` engine ID uses Claude models directly via Anthropic API (with `ANTHROPIC_API_KEY`), bypassing the Copilot model selector.
 
 ### Engine Sub-Fields
 
@@ -1766,7 +1782,36 @@ imports:
 - **Gotchas:** `gh aw mcp inspect/list` does NOT follow `imports:` directives. Check the compiled `.lock.yml` for fully resolved configuration.
 - **Cross-references:** `production-gotchas.md` — MCP inspect limitation
 
+### `dependencies`
+
+- **Type:** array | object
+- **Required:** no
+- **Default:** none
+- **Status:** Current (replaces deprecated `plugins:`)
+
+Declares plugin dependencies from the Agent Package Manager (APM). Dependencies are resolved at compile time via `gh aw compile`.
+
+**Array format:**
+
+```yaml
+dependencies:
+  - "org/plugin-package"
+```
+
+**Object format (with token):**
+
+```yaml
+dependencies:
+  packages:
+    - "org/plugin-package@v1"
+  github-token: "${{ secrets.PLUGIN_TOKEN }}"
+```
+
+> **Migration:** The `plugins:` field is deprecated as of early 2026. Run `gh aw fix --write` to auto-migrate existing workflows.
+
 ### `plugins`
+
+> **DEPRECATED as of early 2026.** Use [`dependencies`](#dependencies) instead. Run `gh aw fix --write` to auto-migrate. The `plugins:` field will continue to function but may be removed in a future compiler version.
 
 - **Type:** array | object
 - **Required:** no
@@ -2093,3 +2138,4 @@ Consolidated list of every known compiler error and its fix:
 | `add-labels` without allowlist | No `allowed` constraint | Always specify `allowed: [...]` |
 | `create-issue` without `title-prefix` | Untrackable issues | Add meaningful `title-prefix` |
 | Missing `max` on safe-outputs | No rate limiting | Set explicit `max` values |
+| `plugins:` field still in use | Deprecated since early 2026; `dependencies:` is current | Run `gh aw fix --write` to auto-migrate |

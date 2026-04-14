@@ -849,3 +849,5 @@ safe-outputs:
 **Not supported:** push-to-pull-request-branch, dispatch-workflow, call-workflow, code-scanning, most project operations.
 
 Use `target-repo: "owner/repo"` on supported types. Use `allowed-repos` to permit additional repositories.
+
+**Wildcard `target-repo`:** The value `target-repo: "*"` is supported at the handler level to permit operations against any repository the App token can access. Use with caution — this grants cross-repo write capability without allowlist restrictions.

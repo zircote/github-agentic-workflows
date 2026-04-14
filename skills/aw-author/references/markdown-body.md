@@ -171,6 +171,34 @@ gh issue view ${{ github.event.issue.number }}
 
 When `${{ github.event }}` is unavailable or incomplete, agents should check for an `event.json` file in the workspace root as a fallback source for event context.
 
+### Instruction File Discovery (`CLAUDE.md`, `AGENTS.md`, `COPILOT.md`)
+
+GitHub Copilot agent mode natively discovers and reads repository instruction files when executing agentic workflows. These files are loaded automatically — no explicit frontmatter configuration needed.
+
+**Supported instruction files:**
+
+| File | Scope |
+|------|-------|
+| `CLAUDE.md` | Claude-specific instructions (Claude Code and Copilot with Claude engine) |
+| `AGENTS.md` | Generic agentic instructions (all agent modes) |
+| `COPILOT.md` | Copilot-specific instructions (Copilot agent mode) |
+
+These files can exist at the repository root or in subdirectories. Workspace-scoped and global-scoped versions are both respected.
+
+**When to reference in the workflow body:**
+
+You do NOT need to tell the agent to read these files — it does so automatically. However, you may want to reference them in the Context section when:
+
+- Convention compliance is critical (e.g., code generation must follow project style)
+- The agent should prioritize specific sections from the instruction file
+- The instruction file contains domain vocabulary the agent needs for the task
+
+```markdown
+## Context
+
+This repository has a `COPILOT.md` with coding conventions. Follow it when generating or modifying code.
+```
+
 ---
 
 ## Writing Style Guidelines
