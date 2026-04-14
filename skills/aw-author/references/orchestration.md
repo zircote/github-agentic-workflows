@@ -250,6 +250,33 @@ safe-outputs:
 - Use `expires` for auto-cleanup
 - Consider `cache-memory` for tracking trends across runs
 
+### Example: Daily Efficiency Improver (from githubnext/agentics)
+
+A scheduled workflow that performs AI-driven productivity improvements on the repository — analyzing code quality signals, identifying low-hanging refactoring opportunities, and filing targeted improvement issues. Pattern added to `githubnext/agentics` on 2026-04-13 (PR #311).
+
+```yaml
+on:
+  schedule: daily
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+tools:
+  github:
+    toolsets: [issues, pull_requests, code_security]
+
+safe-outputs:
+  create-issue:
+    title-prefix: "[efficiency] "
+    labels: [automated, enhancement]
+    max: 3
+    close-older-issues: false   # accumulate, don't replace
+```
+
+**Key characteristic:** Unlike batch reporting (which summarizes), the Efficiency Improver creates actionable items for human follow-up. It avoids duplicate issues by checking for open items with its title prefix before creating new ones.
+
 ---
 
 ## 7. Meta-Agent (Agent Monitoring Agents)

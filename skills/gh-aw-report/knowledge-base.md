@@ -6,6 +6,22 @@
 
 ---
 
+## [2026-04-14] Daily Intelligence Sweep
+
+### GitHub MCP Server (as of 2026-04-14 sweep)
+- **Current version**: v0.33.1 (released 2026-04-14T15:39:43Z)
+- **v0.33.0 new tools**: `resolve_pull_request_review_thread` (new MCP tool matching `resolve-pull-request-review-thread` safe-output in gh-aw)
+- **v0.33.0 enhancements**: `path`, `since`, `until` params added to `list_commits`; OSS granular PRs and issues toolsets; configurable server name/title via translation strings
+- **Known gotcha**: `resolve-pull-request-review-thread` safe-output fails on schedule/workflow_dispatch triggers even with explicit `thread_id` — fix pending upstream (github/gh-aw [plan] issue 2026-04-14)
+- **Previous version**: v0.32.0 (2026-03-06) — context reductions, copilot tools moved to default toolset, MCP Apps UI improvements
+
+### githubnext/agentics (as of 2026-04-14 sweep)
+- **New pattern**: "Daily Efficiency Improver" workflow added (PR #311, 2026-04-13) — scheduled AI-driven repository health improvements
+- **autoloop extracted**: `githubnext/autoloop` is now a standalone repository; agentics updated references (PR #313, 2026-04-12)
+- Repository is at 313+ merged PRs and growing
+
+---
+
 ## [2026-04-14] Bootstrap Entry — Initial Research
 
 ### gh-aw CLI

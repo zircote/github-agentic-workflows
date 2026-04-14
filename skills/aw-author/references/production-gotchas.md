@@ -373,3 +373,43 @@ Repositories with branch protection rulesets that require **signed commits** now
 **Current behavior (early 2026+):** gh-aw correctly signs commits on newly created branches. No configuration change needed.
 
 **Edge case:** Custom tokens (`github-token:` in safe-outputs) using a different App identity may still require signing configuration on the target App.
+
+---
+
+## `resolve-pull-request-review-thread` Fails on Non-PR Triggers
+
+### Symptom
+
+When `resolve-pull-request-review-thread` is called from a `schedule` or `workflow_dispatch` triggered workflow — even with an explicit `thread_id` provided — the safe-output fails with:
+
+```
+Cannot resolve review threads outside of a pull request context
+```
+
+### Root Cause
+
+The safe-output handler's legacy code path requires `triggeringPRNumber` (only available in PR-triggered workflows). When the workflow is triggered by `schedule` or `workflow_dispatch`, no triggering PR context exists, so the handler rejects the call even when `thread_id` maps unambiguously to a specific PR via the GraphQL API.
+
+### Affected Configuration
+
+```yaml
+safe-outputs:
+  resolve-pull-request-review-thread:
+    target: "triggering"   # ← fails when workflow is not triggered by a PR
+    max: 10
+```
+
+### Workaround
+
+Specify the target PR explicitly by number instead of using `"triggering"`:
+
+```yaml
+safe-outputs:
+  resolve-pull-request-review-thread:
+    target: 42             # explicit PR number
+    max: 10
+```
+
+If the PR number is determined at runtime, pass it via the agent output fields (`pr_number` in the safe-output call). Alternatively, only invoke this safe-output from PR-event-triggered workflows.
+
+**Status (2026-04-14):** Fix pending upstream in `github/gh-aw` — handler should allow resolution when explicit `thread_id` is provided and resolves to a valid PR.

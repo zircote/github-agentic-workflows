@@ -73,14 +73,19 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 
 ### GitHub MCP Server
 - **Repository**: `github/github-mcp-server`
+- **Current version**: v0.33.1 (released 2026-04-14)
 - Provides GitHub API tools via MCP protocol
 - Used by Claude Code, Copilot, and other MCP-compatible clients
 - **Projects toolset:** Consolidated `projects_list`, `projects_get`, `projects_write` tools (~50% token reduction, ~23,000 tokens saved)
-- **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
+- **New tools (v0.33.x):** `resolve_pull_request_review_thread` (resolve PR review threads via MCP)
+- **New tools (prior):** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
+- **Enhanced `list_commits` (v0.33.0):** `path`, `since`, `until` filter parameters added
+- **Granular toolsets (v0.33.0):** OSS granular PRs and issues toolsets for fine-grained permission control
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
 - **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
+- **`--exclude-tools` flag (v0.31.0):** Disable individual tools at server config time (also `X-MCP-Exclude-Tools` header in HTTP mode)
 
 ### Claude Code
 - Anthropic's CLI agentic coding tool
@@ -88,6 +93,12 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - Can run gh-aw workflows locally for testing
 
 ## Ecosystem Integrations
+
+### Sample Workflows & Community Resources
+- **`githubnext/agentics`**: Official sample pack of gh-aw workflows (community starter kit, 313+ PRs)
+  - New pattern added 2026-04-13: **Daily Efficiency Improver** — scheduled AI-driven repository health automation
+- **`githubnext/autoloop`**: Standalone repository for the Autoloop pattern (extracted from agentics 2026-04-12); see https://github.com/githubnext/autoloop
+- **`githubnext/awesome-continuous-ai`**: Curated list of Continuous AI actions and frameworks
 
 ### CI/CD Patterns
 - gh-aw workflows compile to standard GitHub Actions
