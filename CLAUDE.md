@@ -47,6 +47,7 @@ After editing any `.github/workflows/*.md` file, always recompile with `gh aw co
 - **`plugins:` is deprecated** — use `dependencies:`, run `gh aw fix --write`
 - **Knowledge base is append-only** — mark old entries `[SUPERSEDED by YYYY-MM-DD]`
 - **Use section headers as edit anchors** — not line numbers (they shift between runs)
+- **PRs are created as drafts** — use `--draft` on `gh pr create`, mark ready with `gh pr ready` after changes are complete
 - **Discussion category ID**: `DIC_kwDORSXBr84C61Lr` (Project News)
 
 ## gh-aw Compiler

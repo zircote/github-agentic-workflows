@@ -92,6 +92,7 @@ The 9 files in `skills/aw-author/references/` are the canonical gh-aw specificat
 7. **`${{ }}` expressions in fenced code blocks are NOT interpolated** — use env vars instead
 8. **Knowledge base is append-only** — mark superseded entries with `[SUPERSEDED by YYYY-MM-DD]`, never delete
 9. **Section headers are anchors, not line numbers** — the daily pipeline uses headers to locate edit targets because line numbers shift between runs
+10. **PRs are created as drafts** — open with `--draft` or `draft: true`, then mark ready with `gh pr ready` after all changes are pushed and verified
 
 ## GitHub Discussion Category
 

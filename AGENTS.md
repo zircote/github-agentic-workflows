@@ -33,6 +33,7 @@ The **aw-author** plugin (v1.3.0) for Claude Code. It provides skills, commands,
 6. **Discussion posts go to the "Project News" category** (ID: `DIC_kwDORSXBr84C61Lr`).
 7. **The daily pipeline is idempotent.** It checks for existing Discussions, PRs, and issues before creating new ones. Re-running on the same day is safe.
 8. **When editing reference files, verify the change compiles.** Run `gh aw compile` after modifying any `.md` file in `.github/workflows/`.
+9. **PRs are created as drafts.** Open with `--draft` or `draft: true` in safe-outputs, then mark ready with `gh pr ready` after all changes are pushed and verified.
 
 ## gh-aw Spec Essentials
 

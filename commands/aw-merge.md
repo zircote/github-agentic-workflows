@@ -41,6 +41,7 @@ If `--dry-run`: show `git log --oneline origin/main..origin/develop` and **exit*
 
 ```bash
 gh pr create \
+  --draft \
   --repo zircote/github-agentic-workflows \
   --base main \
   --head develop \
@@ -57,6 +58,11 @@ $(git log --oneline origin/main..origin/develop)
 
 ---
 _Automated by /aw-merge_"
+```
+
+Mark PR ready:
+```bash
+gh pr ready <PR_NUMBER>
 ```
 
 ### Phase 3: CI and merge

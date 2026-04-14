@@ -39,7 +39,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "docs(references): "
     labels: [automated, reference-update]
-    draft: false
+    draft: true
     base-branch: develop
     max: 1
   push-to-pull-request-branch:
@@ -181,11 +181,17 @@ For each gap, edit the target reference file. Use section headers as anchors (no
 
 ### Phase 7: PR Creation
 
-Create a PR to `develop` using the `create-pull-request` safe-output:
+Create a **draft** PR to `develop` using the `create-pull-request` safe-output:
 - Title: `docs(references): daily intelligence update {TODAY}`
 - Body: summary of gaps addressed, links to issues (using `Closes #NNN`), link to Discussion
 - Base: `develop`
 - Labels: `automated`, `reference-update`
+
+The PR is created as a draft (frontmatter `draft: true`). After all changes are pushed and verified, mark it ready for review:
+
+```bash
+gh pr ready <PR_NUMBER>
+```
 
 ### Phase 8: Summary
 

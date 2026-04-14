@@ -302,6 +302,7 @@ If `--dry-run`: show the diff but do not commit or push.
 
 ```bash
 gh pr create \
+  --draft \
   --repo zircote/github-agentic-workflows \
   --base develop \
   --head daily-intelligence-{TODAY} \
@@ -326,7 +327,12 @@ Automated reference file updates from daily intelligence sweep.
 _Automated by /aw-daily_"
 ```
 
-Store the PR URL.
+Store the PR URL and number.
+
+**Mark PR ready** after all changes are pushed:
+```bash
+gh pr ready {PR_NUMBER}
+```
 
 **Error mode:** If PR creation fails, report error. Leave branch for manual inspection. Switch back to `ORIGINAL_BRANCH`.
 
