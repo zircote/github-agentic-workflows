@@ -21,7 +21,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "chore: "
     labels: [automated]
-    base: main
+    base-branch: main
     max: 1
   add-comment:
     discussions: false

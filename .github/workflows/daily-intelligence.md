@@ -20,8 +20,6 @@ engine:
 tools:
   bash: ["gh:*", "git:*", "echo", "cat", "grep", "date", "mkdir", "jq", "wc", "sort", "diff"]
   edit:
-    paths: ["skills/**", ".claude/skills/**"]
-  web-search:
   web-fetch:
   cache-memory:
     key: "daily-intelligence"
@@ -42,10 +40,12 @@ safe-outputs:
     title-prefix: "docs(references): "
     labels: [automated, reference-update]
     draft: false
-    base: develop
+    base-branch: develop
     max: 1
   push-to-pull-request-branch:
-    target: "created"
+    target: "*"
+    title-prefix: "docs(references): "
+    labels: [automated]
     max: 10
   add-comment:
     discussions: false
