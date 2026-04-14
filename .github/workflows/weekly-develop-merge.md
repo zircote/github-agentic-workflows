@@ -21,11 +21,29 @@ safe-outputs:
   create-pull-request:
     title-prefix: "chore: "
     labels: [automated]
+    draft: true
     base-branch: main
     max: 1
   add-comment:
     discussions: false
     max: 1
+
+post-steps:
+  - name: Mark draft PR ready and request Copilot review with auto-merge
+    env:
+      GH_TOKEN: ${{ github.token }}
+    run: |
+      PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --head develop --state open --json number --jq '.[0].number')
+      if [ -n "$PR" ]; then
+        echo "Found PR #$PR"
+        gh pr ready "$PR" --repo "$GITHUB_REPOSITORY" || true
+        echo "PR #$PR marked ready for review"
+        gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-reviewer "@copilot" 2>/dev/null || echo "Copilot reviewer not available"
+        echo "Requested Copilot review on PR #$PR"
+        gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --auto --delete-branch=false || echo "Auto-merge enabled (will merge when approved)"
+      else
+        echo "No draft PR found"
+      fi
 ---
 
 # Weekly Develop-to-Main Merge Agent

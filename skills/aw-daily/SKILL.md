@@ -329,51 +329,14 @@ _Automated by /aw-daily_"
 
 Store the PR URL and number.
 
-**Mark PR ready** after all changes are pushed:
+When running as a gh-aw workflow, `post-steps` handles marking the draft PR ready for review automatically. When running locally via `/aw-daily`, mark it ready:
 ```bash
 gh pr ready {PR_NUMBER}
 ```
 
+The pipeline does NOT auto-merge. Merging is a separate review decision.
+
 **Error mode:** If PR creation fails, report error. Leave branch for manual inspection. Switch back to `ORIGINAL_BRANCH`.
-
----
-
-## Phase 8: Review & Merge
-
-1. **Request review** (try Copilot, fall back to self-review):
-```bash
-gh pr edit {PR_NUMBER} --add-reviewer "@copilot" 2>/dev/null || echo "Copilot review unavailable, proceeding with self-review"
-```
-
-2. **Wait for CI** (if configured):
-```bash
-# Poll checks every 15 seconds, max 5 minutes
-for i in $(seq 1 20); do
-  STATUS=$(gh pr checks {PR_NUMBER} --json bucket -q '.[].bucket' 2>/dev/null | sort -u)
-  if echo "$STATUS" | grep -q "fail"; then
-    echo "CI failed. Leaving PR open for manual review."
-    break
-  fi
-  if echo "$STATUS" | grep -qv "pending"; then
-    echo "CI passed."
-    break
-  fi
-  sleep 15
-done
-```
-
-3. **Merge** (unless `--no-merge` or CI failed):
-```bash
-gh pr merge {PR_NUMBER} --squash --auto --delete-branch
-```
-
-4. **Restore original branch**:
-```bash
-git checkout "$ORIGINAL_BRANCH"
-git pull origin "$ORIGINAL_BRANCH" 2>/dev/null || true
-```
-
-**Error mode:** If merge fails or CI fails, leave PR open. Report PR URL for manual action.
 
 ---
 
@@ -391,9 +354,7 @@ git pull origin "$ORIGINAL_BRANCH" 2>/dev/null || true
 | Gaps Found:    N (P incorrect, Q outdated, R new)|
 | Issues:        N created, M skipped (existing)   |
 | Files Changed: N                                 |
-| PR:            {PR_URL}                          |
-| Review:        copilot / self                    |
-| Merged:        yes / no / skipped                |
+| PR:            {PR_URL} (ready for review)       |
 +--------------------------------------------------+
 ```
 

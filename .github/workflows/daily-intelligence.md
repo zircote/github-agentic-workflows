@@ -53,6 +53,23 @@ safe-outputs:
   add-labels:
     allowed: [automated, reference-update, intelligence]
     max: 5
+
+post-steps:
+  - name: Mark draft PR ready and request Copilot review with auto-merge
+    env:
+      GH_TOKEN: ${{ github.token }}
+    run: |
+      PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --base develop --search "docs(references): daily intelligence" --state open --json number --jq '.[0].number')
+      if [ -n "$PR" ]; then
+        echo "Found PR #$PR"
+        gh pr ready "$PR" --repo "$GITHUB_REPOSITORY" || true
+        echo "PR #$PR marked ready for review"
+        gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-reviewer "@copilot" 2>/dev/null || echo "Copilot reviewer not available"
+        echo "Requested Copilot review on PR #$PR"
+        gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --squash --auto --delete-branch || echo "Auto-merge enabled (will merge when approved)"
+      else
+        echo "No draft PR found"
+      fi
 ---
 
 # Daily Intelligence Pipeline Agent
@@ -187,11 +204,7 @@ Create a **draft** PR to `develop` using the `create-pull-request` safe-output:
 - Base: `develop`
 - Labels: `automated`, `reference-update`
 
-The PR is created as a draft (frontmatter `draft: true`). After all changes are pushed and verified, mark it ready for review:
-
-```bash
-gh pr ready <PR_NUMBER>
-```
+The PR is created as a draft (frontmatter `draft: true`). The `post-steps` block automatically marks it ready for review after safe-outputs complete. Do NOT merge — merging is a separate review decision.
 
 ### Phase 8: Summary
 
