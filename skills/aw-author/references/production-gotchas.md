@@ -373,3 +373,35 @@ Repositories with branch protection rulesets that require **signed commits** now
 **Current behavior (early 2026+):** gh-aw correctly signs commits on newly created branches. No configuration change needed.
 
 **Edge case:** Custom tokens (`github-token:` in safe-outputs) using a different App identity may still require signing configuration on the target App.
+
+---
+
+## Model Errors
+
+### Model-Not-Supported Detection (Resolved in v0.68.3)
+
+Prior to gh-aw v0.68.3, workflows configured with a model that was unavailable (e.g., a preview model that got retired, a typo in the model name, or a model not accessible to the GitHub App) produced **silent failures or opaque error messages** with no indication that the model itself was the root cause.
+
+**Previous symptom:** Workflow run fails at the agent step with a generic error or times out. Logs show no useful diagnostic. The author has no direct signal that the configured model is the issue.
+
+**Current behavior (v0.68.3+):** gh-aw now surfaces a clear, actionable error message when the configured model is unavailable:
+
+```
+Error: Model "model-name" is not supported or not available for this installation.
+```
+
+**Fix:** Update the `model:` field in the workflow frontmatter to a supported model name. Check `gh aw models` for the current list of available models.
+
+**Note:** If you upgraded from an older gh-aw version and start seeing this error on a previously working workflow, the model may have been retired. Migrate to the closest equivalent model.
+
+### Ctrl-C Does Not Cancel In-Flight Operations (Resolved in v0.68.3)
+
+Prior to gh-aw v0.68.3, pressing Ctrl-C during long-running CLI operations (artifact downloads, log fetches, workflow run polling) **did not terminate background processes**. The subprocess would continue running until network timeout, leaving orphaned processes and blocking the terminal.
+
+**Previous symptom:** Ctrl-C appears to exit the CLI but background operations continue. The terminal hangs or responds slowly. In CI, cancelled jobs left dangling subprocesses that consumed runner resources.
+
+**Root cause:** Context propagation was not threaded through all CLI subprocess calls, so the cancellation signal was not forwarded to child processes.
+
+**Current behavior (v0.68.3+):** Ctrl-C correctly cancels all in-flight operations. Context propagation is now applied consistently across all CLI subprocess calls.
+
+**Impact on workflow authors:** If your workflow had workarounds for this (e.g., aggressive timeouts, wrapper scripts that kill subprocesses manually), those workarounds can be removed when targeting gh-aw v0.68.3+.
