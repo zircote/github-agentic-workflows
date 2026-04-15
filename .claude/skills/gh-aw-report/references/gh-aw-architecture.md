@@ -22,8 +22,9 @@ that traditional deterministic CI cannot handle.
   the agent — they are NOT managed by the CLI
 - Two-file structure: a `.md` source and a `.lock.yml` compiled output
 
-## gh aw CLI (v0.68.3 as of 2026-04-14)
+## gh aw CLI
 
+- Version referenced: `v0.68.3` (as of 2026-04-14)
 - Default AI agent: GitHub Copilot CLI
 - Supported alternative agents: Claude (Anthropic), Codex (OpenAI), custom agents
 - Key commands:
@@ -72,7 +73,7 @@ that traditional deterministic CI cannot handle.
 - Enterprise: HTTP mode with per-request OAuth token forwarding
 - Insiders mode: opt-in experimental features via `/insiders` URL or config header
 - Projects toolset: consolidated (reduces ~23,000 tokens/50% token usage)
-- **v0.33.0 (2026-04-14):** Granular PRs/issues toolsets, resolve review threads tool, `list_commits` gets `path`/`since`/`until` params
+- **v0.33.0 (2026-04-14):** Granular PRs/issues toolsets, resolve review threads tool, `list_commits` gets `path`/`since`/`until` params, configurable server name/title via translation strings, OSS HTTP logging adapter, static CLI flags as per-request filter upper bound
 - **v0.33.1 (2026-04-14):** Hotfix release
 
 ## GitHub Copilot CLI (GA: February 25, 2026)
@@ -82,7 +83,7 @@ that traditional deterministic CI cannot handle.
 - **Plan mode**: shows plan before executing
 - **Background delegation**: prefix with `&` to delegate to cloud coding agent
 - **Specialized sub-agents**: Explore, Task, Code Review, Plan
-- **Model support**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ (deprecated 2026-03-26; use Gemini 3 Ultra)
+- **Model support**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ (deprecated 2026-03-26)
 - Available to all paid Copilot subscribers (Pro, Business, Enterprise)
 
 ## GitHub Copilot Workspace / Agent Mode
