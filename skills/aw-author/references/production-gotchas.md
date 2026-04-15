@@ -373,3 +373,27 @@ Repositories with branch protection rulesets that require **signed commits** now
 **Current behavior (early 2026+):** gh-aw correctly signs commits on newly created branches. No configuration change needed.
 
 **Edge case:** Custom tokens (`github-token:` in safe-outputs) using a different App identity may still require signing configuration on the target App.
+
+---
+
+## Engine & Model Errors (gh-aw v0.68.3+)
+
+### Model-Not-Supported Detection
+
+As of **gh-aw v0.68.3** (released 2026-04-14), the CLI detects when the configured model is unavailable and surfaces a clear, actionable error. Previously, model availability issues produced opaque failures or silent task hangs.
+
+**Symptom (pre-v0.68.3):** Workflow agent step starts but hangs or exits without output. No clear error message.
+
+**Symptom (v0.68.3+):** Clear error: `"model '<name>' is not supported"` with the model identifier shown.
+
+**Fix:** Verify the `engine.model` value against the current supported model list in `orchestration.md`. Remove the `model:` key to fall back to the engine default.
+
+### Ctrl-C / Context Propagation (Resolved in v0.68.3)
+
+**Resolved gotcha** — documented for authors who added workarounds before v0.68.3.
+
+Prior to v0.68.3, Ctrl-C during `gh aw run` or `gh aw audit` did NOT terminate in-flight background processes (artifact downloads, log fetches, git clone operations). These would hang until network timeout.
+
+**Fix (v0.68.3+):** Context is now correctly propagated through all CLI subprocess calls. Ctrl-C terminates all background operations immediately. No workaround needed.
+
+**Note for existing workarounds:** If a workflow had manual timeout logic or retry wrappers to compensate for hung subprocess calls, those can be simplified.

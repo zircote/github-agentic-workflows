@@ -7,6 +7,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 ### gh-aw CLI Extension
 - **Repository**: `github/gh-aw`
 - **Install**: `gh extension install github/gh-aw`
+- **Version**: v0.68.3 (released 2026-04-14)
 - **Purpose**: Compile markdown workflow definitions into GitHub Actions `.lock.yml` files
 - **Key commands**: `gh aw compile`, `gh aw validate`, `gh aw upgrade`, `gh aw mcp inspect`, `gh aw mcp list`
 
@@ -73,13 +74,18 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 
 ### GitHub MCP Server
 - **Repository**: `github/github-mcp-server`
+- **Version**: v0.33.1 (released 2026-04-14; latest stable)
 - Provides GitHub API tools via MCP protocol
 - Used by Claude Code, Copilot, and other MCP-compatible clients
 - **Projects toolset:** Consolidated `projects_list`, `projects_get`, `projects_write` tools (~50% token reduction, ~23,000 tokens saved)
-- **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
+- **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`, `resolve_review_thread` (v0.33.0)
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
+- **`list_commits` new parameters:** `path`, `since`, `until` filters added in v0.33.0
+- **Configurable server name/title:** Via translation strings (v0.33.0)
+- **Granular OSS toolsets:** PRs and issues toolsets now have OSS-level granularity (v0.33.0)
+- **`copilot` toolset:** Copilot-specific tools in default toolset as of v0.32.0
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
-- **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
+- **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding; OSS logging adapter added in v0.33.0
 - **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
 
 ### Claude Code

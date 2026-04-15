@@ -85,4 +85,31 @@
 - Threat detection job runs per-workflow: prompt injection, credential leaks, malicious code
 
 ---
+
+## [2026-04-15] Daily Intelligence Update
+
+### gh-aw CLI (as of 2026-04-15)
+- **v0.68.3** released 2026-04-14 (latest; previous tracked: v0.68.1)
+- **Context propagation fix**: Ctrl-C cancellation now correctly terminates all background CLI subprocess and git operations (PR #26372)
+- **Model-not-supported detection**: Smarter AI model error handling — surfaces clear errors when a model is unavailable instead of failing silently
+- **Shared workflow import improvements**: More reliable resolution of shared workflow imports
+- **`push_signed_commits.cjs` overhaul**: Major edge-case reliability improvements
+
+### GitHub MCP Server (as of 2026-04-15)
+- **v0.33.1** released 2026-04-14 (patch on v0.33.0); latest stable
+- **v0.33.0** features (2026-04-14):
+  - `resolve_review_thread` / unresolve: New tool for PR review thread management (PR #1919)
+  - Configurable server name and title via translation strings (PR #2159)
+  - `list_commits` gains `path`, `since`, `until` filter parameters (PR #2260)
+  - Granular OSS PRs and issues toolsets (PR #2306)
+  - OSS logging adapter for HTTP deployment (PR #2008)
+  - HTTP mode: static CLI flags enforced as upper bound for per-request toolset filtering (PR #2208)
+- **`copilot` toolset** is in default toolset as of v0.32.0 (Copilot-specific tools available out-of-the-box)
+
+### zircote/github-agentic-workflows (as of 2026-04-15)
+- Plugin at **v1.3.1** (bumped 2026-04-15 from v1.3.0)
+- Post-steps pattern adopted: daily-intelligence and weekly-develop-merge workflows now auto-cycle draft→ready→Copilot review→auto-merge via post-steps
+- Agent instruction files added: `.github/copilot-instructions.md`, `AGENTS.md`, `CLAUDE.md`
+
+---
 <!-- Append new entries above this line, newest first -->
