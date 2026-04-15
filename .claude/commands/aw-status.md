@@ -1,32 +1,60 @@
 ---
-name: aw-status
-description: >
-  Summarize the current state of the GitHub Agentic Workflows ecosystem from the
-  persistent knowledge base. Provides a quick briefing without running new web
-  searches. Use with: /aw-status [--domain domain] [--since YYYY-MM-DD]
-tools:
-  - Read
+description: Quick briefing on current gh-aw ecosystem state from the knowledge base
+argument-hint: "[--domain domain] [--since YYYY-MM-DD]"
 ---
 
-Read the knowledge base at `skills/gh-aw-report/knowledge-base.md`
-and provide a concise status briefing covering:
+# /aw-status
+
+Reads the persistent knowledge base and delivers a quick 300–400 word briefing on the current state of the gh-aw ecosystem. No web searches needed — this is a fast, offline status check.
+
+## Usage
+
+```
+/aw-status                      → Full briefing across all domains
+/aw-status --domain gh-aw       → Briefing focused on a specific domain
+/aw-status --since 2026-04-01   → Only entries since the given date
+```
 
 ## Flags
-
-Parse the argument string for these optional flags:
 
 - `--domain` — Focus the briefing on a specific domain: `gh-aw`, `actions`, `workspace`, `agent-mode`, `models`, `mcp-server`, `claude-code`, `community`
 - `--since` — Only include knowledge base entries from this date forward
 
-## Briefing Format
+## Workflow
 
-1. **Current versions & GA status** — gh-aw CLI, Copilot CLI, Copilot Workspace, GitHub MCP Server
-2. **Active deprecations & breaking changes** — what needs migration now
-3. **Key architectural facts** — how the system works (safe outputs, AWF, MCP Gateway, etc.)
-4. **Last report date** — when the knowledge base was last updated
-5. **Recommended immediate actions** — top 2–3 things a practitioner should do right now
+You are a briefing analyst. Deliver a concise status report from the knowledge base.
 
-Keep the briefing to 300–400 words. If the knowledge base has not been updated in more
-than 3 days, note this and recommend running `/aw-report` to refresh.
+1. Read the knowledge base at `skills/gh-aw-report/knowledge-base.md`
+2. Read `skills/gh-aw-report/references/gh-aw-architecture.md` for architecture context
+3. If `--domain` is passed, filter entries to the specified domain
+4. If `--since` is passed, filter entries to those dated on or after the given date
+5. Synthesize a 300–400 word briefing covering:
 
-Entries marked `[SUPERSEDED]` should be excluded from the briefing.
+### Briefing Format
+
+```
+## gh-aw Ecosystem Status — YYYY-MM-DD
+
+### Current Versions
+- gh-aw CLI: vX.Y.Z
+- GitHub MCP Server: vX.Y.Z
+- [other tracked versions]
+
+### Active Deprecations
+- [deprecation with timeline and migration path]
+
+### Recent Changes (last 7 days)
+- [notable changes from knowledge base]
+
+### Recommended Actions
+- [specific actions for workflow maintainers]
+```
+
+6. If the knowledge base is empty or has no recent entries, report that and recommend running `/aw-report` to populate it.
+
+## Notes
+
+- This command does NOT perform web searches — it reads only from the knowledge base
+- For fresh intelligence, run `/aw-report` first
+- The knowledge base is updated by each `/aw-report` run
+- Entries marked `[SUPERSEDED]` are excluded from the briefing

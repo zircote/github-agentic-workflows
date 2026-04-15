@@ -1,101 +1,102 @@
 # gh-aw Architecture Reference
 
-> Last updated: 2026-04-14. This file captures stable architectural facts about the
-> GitHub Agentic Workflows system to reduce web searches on known-stable information.
+Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by the `gh-aw-report` skill to contextualize intelligence findings.
 
-## System Overview
+## Core Components
 
-GitHub Agentic Workflows (gh-aw) is GitHub's framework for "Continuous AI" — AI agents
-that run as GitHub Actions jobs, performing reasoning-based repository maintenance tasks
-that traditional deterministic CI cannot handle.
+### gh-aw CLI Extension
+- **Repository**: `github/gh-aw`
+- **Install**: `gh extension install github/gh-aw`
+- **Purpose**: Compile markdown workflow definitions into GitHub Actions `.lock.yml` files
+- **Key commands**: `gh aw compile`, `gh aw validate`, `gh aw upgrade`, `gh aw mcp inspect`, `gh aw mcp list`
 
-**Core repository**: `github/gh-aw`
-**Docs site**: `github.github.com/gh-aw/`
-**GitHub Next project page**: `githubnext.com/projects/agentic-workflows/`
-**Technical preview launched**: February 13, 2026
+### Workflow File Structure
+- **Source**: `.github/workflows/<name>.md` — markdown with YAML frontmatter
+- **Compiled**: `.github/workflows/<name>.lock.yml` — generated Actions workflow (never edit directly)
+- **Frontmatter**: trigger config, engine, tools, permissions, safe-outputs, network
+- **Body**: Prose instructions for the AI agent (H1 heading, context, instructions, edge cases)
 
-## Workflow Authoring
+### Engines
+- `copilot` — GitHub-native (default), powered by GitHub Models
+- `claude` — Anthropic Claude, strong reasoning
+- `codex` — OpenAI, code-focused
+- `custom` — bring your own engine via MCP or API
 
-- Workflows are written in **Markdown** (not YAML), stored in `.github/workflows/*.md`
-- The `gh aw compile` command compiles Markdown to GitHub Actions YAML (`.lock.yml` files)
-- Workflow prompt files (`.github/aw/*.md`) are resolved directly from the gh-aw repo by
-  the agent — they are NOT managed by the CLI
-- Two-file structure: a `.md` source and a `.lock.yml` compiled output
+### Safe-Outputs System
+- All write operations go through safe-outputs using GitHub App tokens
+- The AI agent itself is read-only; safe-outputs are the only write path
+- Each safe-output type has configurable constraints (allowlists, max limits, title prefixes)
+- Write permissions in `permissions:` block are rejected by the compiler
 
-## gh aw CLI
+### MCP Server Integration
+- gh-aw supports MCP (Model Context Protocol) servers as tools
+- Container-based servers use `container:` field with Docker image references
+- Process-based servers use `command:` with `npx` or `uvx`
+- MCP gateway logs at `agent-artifacts/mcp-logs/{server}.log`
 
-- Default AI agent: GitHub Copilot CLI
-- Supported alternative agents: Claude (Anthropic), Codex (OpenAI), custom agents
-- Key commands:
-  - `gh aw compile` — compile Markdown workflows to YAML
-  - `gh aw run` — execute a workflow
-  - `gh aw fix --write` — auto-migrate deprecated config fields
-  - `gh aw upgrade` — upgrade workflows to latest patterns
+### Dependencies System (Agent Package Manager)
 
-## Dependencies System (Agent Package Manager / APM)
+- **`plugins:` field:** DEPRECATED as of early 2026
+- **`dependencies:` field:** Current replacement, backed by Microsoft APM (Agent Package Manager)
+- **Migration:** Run `gh aw fix --write` to auto-migrate existing `plugins:` references
+- APM is the package registry for gh-aw workflow plugin dependencies
+- Dependencies are resolved at compile time via `gh aw compile`
 
-- As of early 2026, **`plugins:` frontmatter field is DEPRECATED**
-- Replacement: **`dependencies:` field** backed by Microsoft APM (Agent Package Manager)
-- Migration: run `gh aw fix --write` to auto-migrate existing `plugins:` fields
+## Related GitHub Products
 
-## Security Architecture
+### GitHub Copilot Workspace
+- Browser-based agentic coding environment
+- Plan → Implement → Review → PR cycle
+- Uses Copilot engine for code generation
+- Natively reads `CLAUDE.md`, `AGENTS.md`, `COPILOT.md`, and custom instruction files
+- Workspace-scoped and global-scoped instruction files are both respected
 
-| Layer | Mechanism |
-|-------|-----------|
-| Default permissions | Read-only repository access |
-| Write operations | "Safe Outputs" subsystem — separate permission-controlled jobs |
-| Network egress | Agent Workflow Firewall (AWF) — restricts outbound connections |
-| MCP access | MCP Gateway — centralized access management |
-| Threat detection | Dedicated job checks for prompt injection, leaked credentials, malicious code |
+### GitHub Copilot Agent Mode (VS Code / CLI)
+- Agentic coding in IDE with tool use
+- `@workspace` agent for codebase-wide tasks
+- CLI: `gh copilot` for terminal-based agentic coding
 
-### Safe Output Types (known)
-- `remove-labels` — workflow can remove labels from issues/PRs
-- Additional types are added incrementally via gh-aw releases
+### GitHub Copilot CLI (GA: February 25, 2026)
 
-## Companion Projects
-
-| Project | Purpose |
-|---------|---------|
-| `gh-aw-actions` | Shared library of custom GitHub Actions for gh-aw workflows |
-| Agent Workflow Firewall (AWF) | Network egress control for agentic jobs |
-| MCP Gateway | Centralized MCP server access management |
-| `githubnext/agentics` | Sample pack of community gh-aw workflows |
-| `githubnext/awesome-continuous-ai` | Curated list of Continuous AI tools and frameworks |
-
-## GitHub MCP Server
-
-- Official repo: `github/github-mcp-server`
-- Deployment modes: Docker (`ghcr.io/github/github-mcp-server`), HTTP with OAuth, local
-- **Deprecated**: npm `@modelcontextprotocol/server-github` (deprecated April 2025)
-- Key tools: repository management, issue/PR automation, CI/CD workflow intelligence,
-  code analysis, Copilot job status (`get_copilot_job_status`)
-- Enterprise: HTTP mode with per-request OAuth token forwarding
-- Insiders mode: opt-in experimental features via `/insiders` URL or config header
-- Projects toolset: consolidated (reduces ~23,000 tokens/50% token usage)
-
-## GitHub Copilot CLI (GA: February 25, 2026)
-
-- Terminal-native agentic coding environment
-- **Autopilot mode**: fully autonomous task execution
-- **Plan mode**: shows plan before executing
-- **Background delegation**: prefix with `&` to delegate to cloud coding agent
-- **Specialized sub-agents**: Explore, Task, Code Review, Plan
-- **Model support**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
+- Terminal-native agentic coding environment and default agent runtime for gh-aw
+- **Autopilot mode:** Fully autonomous task execution without approval prompts
+- **Plan mode:** Displays step-by-step plan before execution for review
+- **Background delegation:** Prefix prompt with `&` to delegate to cloud coding agent
+- **Specialized sub-agents:** Explore, Task, Code Review, Plan
+- **Model support:** Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
 - Available to all paid Copilot subscribers (Pro, Business, Enterprise)
 
-## GitHub Copilot Workspace / Agent Mode
+### GitHub Models API
+- Model serving platform at `https://models.github.com`
+- Hosts multiple LLM providers (OpenAI, Anthropic, Meta, etc.)
+- Used by gh-aw engines for inference
 
-- Agent mode GA: VS Code (earlier) + JetBrains (March 2026)
-- Copilot reads `CLAUDE.md`, `AGENTS.md`, `COPILOT.md`, and custom instruction files
-- Agentic code review: gathers full project context → suggests changes → can spawn
-  fix PR via coding agent automatically
-- Assign GitHub issue to Copilot → autonomous background work → PR opened for review
-- Waitlist removed for Pro/Business/Enterprise (early 2026)
+### GitHub MCP Server
+- **Repository**: `github/github-mcp-server`
+- Provides GitHub API tools via MCP protocol
+- Used by Claude Code, Copilot, and other MCP-compatible clients
+- **Projects toolset:** Consolidated `projects_list`, `projects_get`, `projects_write` tools (~50% token reduction, ~23,000 tokens saved)
+- **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
+- **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
+- **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
+- **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
+- **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
 
-## Continuous AI Paradigm
+### Claude Code
+- Anthropic's CLI agentic coding tool
+- Integrates with GitHub via MCP servers
+- Can run gh-aw workflows locally for testing
 
-GitHub Next's framing: "Continuous AI" is the agentic evolution of CI.
-- **NOT a replacement** for deterministic CI/CD
-- **Augments** existing pipelines with reasoning-based automation
-- Target use cases: issue triage, documentation updates, test generation, CI failure
-  analysis, PR review, repository health reporting, accessibility scanning
+## Ecosystem Integrations
+
+### CI/CD Patterns
+- gh-aw workflows compile to standard GitHub Actions
+- Can coexist with traditional `.yml` Actions workflows (with caveats around App token pushes)
+- `dispatch-workflow` safe-output enables runtime workflow chaining
+- `call-workflow` enables compile-time fan-out (inlined reusable workflows)
+
+### Security Model
+- `strict: true` (default) — restricts network, enforces ecosystem identifiers
+- `strict: false` — required for custom domains and untrusted input
+- `lockdown` settings for public repositories
+- Network firewall with ecosystem identifiers: `defaults`, `github`, `containers`, `node`, `python`

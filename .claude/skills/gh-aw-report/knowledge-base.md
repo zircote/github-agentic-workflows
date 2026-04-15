@@ -2,7 +2,7 @@
 
 > Persistent cross-session facts about the GitHub Agentic Workflows ecosystem.
 > Updated by each run of the gh-aw-report skill. Entries are dated and append-only.
-> Do not remove entries — mark superseded information with ~~strikethrough~~ and a note.
+> Do not remove entries — mark superseded information with `[SUPERSEDED by YYYY-MM-DD]`.
 
 ---
 

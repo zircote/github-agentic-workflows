@@ -34,8 +34,8 @@ After editing any `.github/workflows/*.md` file, always recompile with `gh aw co
 | Path | Role |
 |------|------|
 | `skills/aw-author/references/` | 9 canonical reference files — the core deliverable |
-| `skills/aw-daily/SKILL.md` | 9-phase autonomous pipeline |
-| `skills/gh-aw-report/knowledge-base.md` | Persistent append-only KB |
+| `.claude/skills/aw-daily/SKILL.md` | 9-phase autonomous pipeline |
+| `.claude/skills/gh-aw-report/knowledge-base.md` | Persistent append-only KB |
 | `.github/workflows/daily-intelligence.md` | Primary daily gh-aw workflow |
 | `.github/workflows/weekly-develop-merge.md` | Weekly merge gh-aw workflow |
 | `.claude-plugin/plugin.json` | Plugin manifest |

@@ -1,62 +1,97 @@
-# Extended Search Query Library
+# Search Query Library
 
-> Reference for the gh-aw-report skill. The SKILL.md lists 8 required queries.
-> This file provides additional queries for deeper coverage of specific subtopics.
+Curated web search queries for the `gh-aw-report` skill. Organized by domain.
 
-## Core Required Queries (from SKILL.md)
+## Primary Sweep (8 queries — run by default)
 
-1. `site:github.blog/changelog github agentic workflows`
-2. `"gh-aw" OR "github agentic workflows" new features breaking changes 2026`
-3. `github/gh-aw releases issues discussions 2026`
-4. `github MCP server releases changelog 2026`
-5. `github copilot workspace agent mode updates 2026`
-6. `github copilot CLI agentic features 2026`
-7. `"continuous AI" github agentic CI/CD community 2026`
-8. `claude code github integration CLAUDE.md AGENTS.md 2026`
+### 1. gh-aw Core
+```
+"github agentic workflows" OR "gh-aw" OR "gh aw" release OR update OR changelog
+```
+**Targets**: gh-aw CLI releases, version bumps, breaking changes
 
-## Supplemental Queries by Topic Area
+### 2. GitHub Actions AI Features
+```
+"github actions" AI OR agentic OR copilot OR agent new feature OR update OR announcement
+```
+**Targets**: GitHub Actions platform changes affecting agentic workflows
 
-### gh-aw CLI & Tooling
-- `"gh aw" compile upgrade fix deprecation`
-- `site:github.com/github/gh-aw issues`
-- `"agent package manager" APM github workflows`
-- `"safe outputs" github agentic workflows`
-- `"agent workflow firewall" AWF github`
-- `"MCP gateway" github agentic`
+### 3. GitHub Copilot Workspace
+```
+"github copilot workspace" OR "copilot workspace" update OR release OR feature
+```
+**Targets**: Copilot Workspace changes, new capabilities
 
-### GitHub Actions Core
-- `site:github.blog/changelog github actions deprecations`
-- `github actions runner ubuntu macos windows deprecation 2026`
-- `github actions OIDC token changes 2026`
-- `github actions immutable actions update`
-- `github actions pricing changes 2026`
+### 4. GitHub Copilot Agent Mode
+```
+"github copilot" "agent mode" OR "agentic" OR "coding agent" update OR release
+```
+**Targets**: Copilot agent capabilities in VS Code, CLI, IDE extensions
 
-### GitHub MCP Server
-- `site:github.com/github/github-mcp-server/releases`
-- `github MCP server insiders mode new tools`
-- `github MCP server OAuth HTTP enterprise`
-- `github MCP copilot job status tools`
+### 5. GitHub Models API
+```
+"github models" API OR marketplace new model OR update OR deprecation
+```
+**Targets**: New models available, API changes, deprecations
 
-### Copilot & Workspace
-- `github copilot coding agent issue assignment PR 2026`
-- `github copilot JetBrains agent mode general availability`
-- `github copilot custom instructions AGENTS.md workspace`
-- `copilot workspace agentic code review fix PR`
+### 6. GitHub MCP Server
+```
+"github-mcp-server" OR "github mcp server" release OR update OR feature
+```
+**Targets**: MCP server releases, new tools, breaking changes
 
-### Claude Code Integration
-- `"CLAUDE.md" github copilot agent instructions`
-- `claude code MCP github server setup 2026`
-- `"steipete/claude-code-mcp" updates`
-- `anthropic claude github actions workflow`
+### 7. Claude Code + GitHub
+```
+"claude code" github OR "mcp" OR "agentic" update OR integration OR release
+```
+**Targets**: Claude Code releases, GitHub integration improvements
 
-### Community & Ecosystem
-- `site:dev.to github agentic workflows tutorial`
-- `site:news.ycombinator.com github agentic workflows`
-- `"githubnext/agentics" new workflows`
-- `"awesome-continuous-ai" new entries`
-- `github agentic workflows production case study`
+### 8. Agentic CI/CD Community
+```
+"agentic ci" OR "agentic cd" OR "ai ci/cd" OR "llm github actions" pattern OR workflow OR best practice
+```
+**Targets**: Community patterns, blog posts, new tooling in the agentic CI/CD space
 
-### Security
-- `github agentic workflows prompt injection detection`
-- `github agentic workflows permissions security model`
-- `AWF network egress firewall rules agentic`
+## Deep Dive Queries (run on request or for specific topics)
+
+### gh-aw Deprecations
+```
+"gh-aw" OR "github agentic workflows" deprecated OR breaking OR migration
+```
+
+### MCP Protocol Updates
+```
+"model context protocol" OR "mcp" specification OR update OR "mcp server" new
+```
+
+### GitHub App Token Changes
+```
+"github app" token OR "installation token" OR "fine-grained" change OR update
+```
+
+### Safe-Outputs Changes
+```
+"gh-aw" "safe-outputs" OR "safe outputs" new OR change OR deprecation
+```
+
+### Engine Updates
+```
+"gh-aw" engine OR "copilot engine" OR "claude engine" OR "codex engine" update
+```
+
+### Security Advisories
+```
+"github actions" security advisory OR vulnerability OR CVE agentic OR workflow
+```
+
+### Competitor Landscape
+```
+"ai code review" OR "ai ci" OR "automated pr" tool OR platform launch OR release
+```
+
+## Query Construction Notes
+
+- Use `OR` for term alternatives, quotes for exact phrases
+- Append `site:github.blog` or `site:github.com` to narrow to official sources
+- Append date range filters when available (e.g., `after:YYYY-MM-DD`)
+- For GitHub Discussions/Issues: use `gh search issues` or `gh search discussions` via CLI

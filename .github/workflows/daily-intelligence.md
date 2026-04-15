@@ -53,6 +53,9 @@ safe-outputs:
   add-labels:
     allowed: [automated, reference-update, intelligence]
     max: 5
+  assign-to-agent:
+    target: "*"
+    max: 5
 
 post-steps:
   - name: Mark draft PR ready and request Copilot review with auto-merge
@@ -83,11 +86,11 @@ This workflow runs daily around 07:00 via fuzzy schedule, or on-demand via workf
 ## Reference Files
 
 The following files contain the skill logic and reference data:
-- `skills/aw-daily/SKILL.md` — Full 9-phase pipeline logic
-- `skills/aw-daily/references/gap-analysis-targets.md` — Reference file inventory for gap analysis
-- `skills/aw-daily/references/tracked-repos.md` — GitHub repos to query for activity
-- `skills/gh-aw-report/references/search-queries.md` — Web search query library
-- `skills/gh-aw-report/knowledge-base.md` — Persistent knowledge base
+- `.claude/skills/aw-daily/SKILL.md` — Full 9-phase pipeline logic
+- `.claude/.claude/skills/aw-daily/references/gap-analysis-targets.md` — Reference file inventory for gap analysis
+- `.claude/skills/aw-daily/references/tracked-repos.md` — GitHub repos to query for activity
+- `.claude/.claude/skills/gh-aw-report/references/search-queries.md` — Web search query library
+- `.claude/.claude/skills/gh-aw-report/knowledge-base.md` — Persistent knowledge base
 
 ## Instructions
 
@@ -118,11 +121,11 @@ gh pr list --repo zircote/github-agentic-workflows --base develop --search "dail
 
 If a PR already exists, report "Today's pipeline already completed" and stop.
 
-4. Read `skills/gh-aw-report/knowledge-base.md` to determine the last report date (`LAST_DATE`). Look for the most recent `### YYYY-MM-DD` heading.
+4. Read `.claude/skills/gh-aw-report/knowledge-base.md` to determine the last report date (`LAST_DATE`). Look for the most recent `### YYYY-MM-DD` heading.
 
 ### Phase 1: Intelligence Sweep
 
-Execute 8 web searches from the query library at `skills/gh-aw-report/references/search-queries.md`. For each search:
+Execute 8 web searches from the query library at `.claude/skills/gh-aw-report/references/search-queries.md`. For each search:
 - Extract version numbers, release dates, feature descriptions, deprecation notices, breaking changes
 - Note the source URL for every finding
 - Discard results older than 14 days or clearly unrelated
@@ -147,7 +150,7 @@ If zero results across ALL searches AND ALL GitHub queries, stop with a noop —
 
 ### Phase 2: Knowledge Base Update
 
-Review findings for stable, persistent facts. Append new entries to `skills/gh-aw-report/knowledge-base.md` using the format:
+Review findings for stable, persistent facts. Append new entries to `.claude/skills/gh-aw-report/knowledge-base.md` using the format:
 
 ```
 ### YYYY-MM-DD — category — Title
@@ -162,7 +165,7 @@ Create a Discussion in the Project News category with today's report content. Us
 
 ### Phase 4: Gap Analysis
 
-Read `skills/aw-daily/references/gap-analysis-targets.md` for the reference file inventory. For each reference file:
+Read `.claude/skills/aw-daily/references/gap-analysis-targets.md` for the reference file inventory. For each reference file:
 
 1. Read the file
 2. Compare against today's findings (or the latest report if research was skipped)
@@ -183,6 +186,8 @@ For each identified gap, check if an open issue with matching `[aw-daily]` title
 - Title: `[aw-daily] GAP-{N}: {short description}`
 - Body: gap details, current content excerpt, expected change, source URL
 - Labels: `automated`, `reference-update`
+
+After creating each issue, assign it to Copilot using the `assign-to-agent` safe-output so the issue is automatically picked up for implementation.
 
 ### Phase 6: Implementation
 
