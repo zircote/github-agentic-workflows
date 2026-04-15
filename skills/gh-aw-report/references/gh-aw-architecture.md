@@ -73,11 +73,17 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 
 ### GitHub MCP Server
 - **Repository**: `github/github-mcp-server`
+- **Latest version**: v0.33.1 (released 2026-04-14)
 - Provides GitHub API tools via MCP protocol
 - Used by Claude Code, Copilot, and other MCP-compatible clients
 - **Projects toolset:** Consolidated `projects_list`, `projects_get`, `projects_write` tools (~50% token reduction, ~23,000 tokens saved)
 - **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
+- **`resolve_review_thread` tool:** Resolve or unresolve PR review threads (v0.33.0)
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
+- **`list_commits` filters:** New `path`, `since`, and `until` parameters for commit filtering (v0.33.0)
+- **Configurable server name/title:** Via translation strings for custom deployments (v0.33.0)
+- **Granular OSS PRs/issues toolsets:** New toolset granularity separating PR and issue tools (v0.33.0)
+- **OSS logging adapter for HTTP:** Initial logging adapter for HTTP deployment mode (v0.33.0)
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
 - **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
