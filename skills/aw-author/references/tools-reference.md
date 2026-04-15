@@ -127,11 +127,12 @@ tools:
 | `secret_protection` | Secret scanning |
 | `security_advisories` | Security advisory management |
 | `stargazers` | Star information |
+| `copilot` | Copilot-specific tools (job status, issue assignment, PR creation) — default toolset |
 
 ### Default Toolsets
 
-- **General:** `[context, repos, issues, pull_requests, users]`
-- **GitHub Actions:** `[context, repos, issues, pull_requests]` (token limitations)
+- **General:** `[context, repos, issues, pull_requests, users, copilot]`
+- **GitHub Actions:** `[context, repos, issues, pull_requests, copilot]` (token limitations)
 
 ### Common Combinations
 
