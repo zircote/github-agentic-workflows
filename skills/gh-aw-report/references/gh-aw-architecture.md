@@ -6,6 +6,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 
 ### gh-aw CLI Extension
 - **Repository**: `github/gh-aw`
+- **Version:** v0.68.3 (released 2026-04-14)
 - **Install**: `gh extension install github/gh-aw`
 - **Purpose**: Compile markdown workflow definitions into GitHub Actions `.lock.yml` files
 - **Key commands**: `gh aw compile`, `gh aw validate`, `gh aw upgrade`, `gh aw mcp inspect`, `gh aw mcp list`
