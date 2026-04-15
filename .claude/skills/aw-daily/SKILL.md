@@ -334,9 +334,100 @@ When running as a gh-aw workflow, `post-steps` handles marking the draft PR read
 gh pr ready {PR_NUMBER}
 ```
 
-The pipeline does NOT auto-merge. Merging is a separate review decision.
+Phase 8 handles review monitoring, remediation, and merge. Do NOT merge here.
 
 **Error mode:** If PR creation fails, report error. Leave branch for manual inspection. Switch back to `ORIGINAL_BRANCH`.
+
+---
+
+## Phase 8: PR Review Monitoring & Remediation
+
+After the PR is created and marked ready, request Copilot review and monitor for feedback. This phase runs a review-fix loop until the PR is approved or the loop limit is reached.
+
+### Step 8.1: Request Copilot Review
+
+```bash
+gh pr edit {PR_NUMBER} --repo zircote/github-agentic-workflows --add-reviewer "@copilot" 2>/dev/null || echo "Copilot reviewer not available"
+```
+
+### Step 8.2: Wait for Review
+
+Poll for review completion. Check every 30 seconds, up to 10 minutes:
+
+```bash
+REVIEW_STATE=$(gh pr view {PR_NUMBER} --repo zircote/github-agentic-workflows --json reviews --jq '.reviews | map(select(.state != "COMMENTED")) | last | .state // "PENDING"')
+```
+
+States: `APPROVED` (proceed to 8.5), `CHANGES_REQUESTED` (proceed to 8.3), `PENDING` (keep polling).
+
+If no review after 10 minutes, log "Review timeout — PR left open for async review" and skip to Phase 9.
+
+### Step 8.3: Fetch and Triage Review Comments
+
+Fetch all inline code review comments:
+
+```bash
+gh api repos/zircote/github-agentic-workflows/pulls/{PR_NUMBER}/comments --paginate
+```
+
+For each comment, assess:
+- Is the suggestion correct? (Check against the referenced code)
+- Is the fix safe? (Localized change, no cascading effects)
+- Confidence score: high (>= 95%) = auto-accept, low = skip with explanation
+
+### Step 8.4: Apply Fixes, Reply, Push, Resolve
+
+For each accepted comment:
+1. Read the target file
+2. Apply the fix using section headers as anchors
+3. If the file has a `.claude/` mirror (or vice versa), apply the same fix to both copies
+
+After all fixes:
+```bash
+git add {changed files}
+git commit -m "fix: address Copilot review feedback
+
+- {bullet per fix}
+
+Resolves review comments on PR #{PR_NUMBER}"
+git push origin daily-intelligence-{TODAY}
+```
+
+Reply to every comment:
+- **Fixed**: `Fixed in {commit-sha-short}.`
+- **Rejected**: `Reviewed — not applying because {reason}.`
+- **Question**: `{direct answer}`
+
+Resolve all threads via GraphQL:
+```bash
+gh api graphql -f query='mutation { resolveReviewThread(input: {threadId: "{THREAD_ID}"}) { thread { isResolved } } }'
+```
+
+**Loop limit:** Maximum 2 review-fix cycles. If Copilot requests changes a third time, log "Review loop limit reached — PR left for manual review" and proceed to Phase 9.
+
+### Step 8.5: Merge the PR
+
+After review is complete (approved, or fixes pushed and all threads resolved), merge the PR:
+
+```bash
+gh pr merge {PR_NUMBER} --repo zircote/github-agentic-workflows --squash --delete-branch
+```
+
+If direct merge fails (e.g., branch protection requires approvals), fall back to auto-merge:
+```bash
+gh pr merge {PR_NUMBER} --repo zircote/github-agentic-workflows --squash --auto --delete-branch || echo "Auto-merge enabled — will merge when requirements are met"
+```
+
+Verify the merge succeeded:
+```bash
+gh pr view {PR_NUMBER} --repo zircote/github-agentic-workflows --json state -q '.state'
+```
+
+If state is `MERGED`, the pipeline is complete. If state is still `OPEN` with auto-merge enabled, report that and proceed to Phase 9.
+
+If `--no-merge` flag was passed, skip this step entirely and report "PR left open per --no-merge flag."
+
+**Error mode:** If remediation fails for any comment, skip that comment with a reply explaining the issue. Do not block the entire phase on a single comment failure. If merge fails after 2 attempts, leave the PR open and report the error.
 
 ---
 
@@ -354,7 +445,11 @@ The pipeline does NOT auto-merge. Merging is a separate review decision.
 | Gaps Found:    N (P incorrect, Q outdated, R new)|
 | Issues:        N created, M skipped (existing)   |
 | Files Changed: N                                 |
-| PR:            {PR_URL} (ready for review)       |
+| PR:            {PR_URL}                          |
+| Review:        {APPROVED/PENDING/CHANGES_REQ}    |
+| Fixes Applied: N comments fixed, M rejected      |
+| Threads:       N/M resolved                      |
+| Merge:         {MERGED/auto-merge enabled/open}  |
 +--------------------------------------------------+
 ```
 

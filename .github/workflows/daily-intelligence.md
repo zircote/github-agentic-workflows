@@ -53,9 +53,6 @@ safe-outputs:
   add-labels:
     allowed: [automated, reference-update, intelligence]
     max: 5
-  assign-to-agent:
-    target: "*"
-    max: 5
 
 post-steps:
   - name: Mark draft PR ready and request Copilot review with auto-merge
@@ -187,7 +184,7 @@ For each identified gap, check if an open issue with matching `[aw-daily]` title
 - Body: gap details, current content excerpt, expected change, source URL
 - Labels: `automated`, `reference-update`
 
-After creating each issue, assign it to Copilot using the `assign-to-agent` safe-output so the issue is automatically picked up for implementation.
+Do NOT assign issues to Copilot — the pipeline handles implementation itself in Phase 6.
 
 ### Phase 6: Implementation
 
@@ -209,11 +206,32 @@ Create a **draft** PR to `develop` using the `create-pull-request` safe-output:
 - Base: `develop`
 - Labels: `automated`, `reference-update`
 
-The PR is created as a draft (frontmatter `draft: true`). The `post-steps` block automatically marks it ready for review after safe-outputs complete. Do NOT merge — merging is a separate review decision.
+The PR is created as a draft (frontmatter `draft: true`). The `post-steps` block automatically marks it ready and requests Copilot review after safe-outputs complete.
 
-### Phase 8: Summary
+### Phase 8: PR Review Monitoring & Remediation
 
-Report what was accomplished: searches run, findings count, gaps identified, issues created, files changed, PR URL. If any phase was skipped or failed, note it clearly.
+After the PR is marked ready, the `post-steps` block requests Copilot review. Monitor the PR for review feedback and remediate:
+
+1. **Wait for review**: Poll `gh pr view` for review state every 30 seconds, up to 10 minutes. If `APPROVED`, skip to enabling auto-merge. If `CHANGES_REQUESTED`, proceed to remediation. If timeout, log and continue.
+
+2. **Fetch review comments**: Use `gh api repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments --paginate` to get all inline comments.
+
+3. **Triage each comment**: Assess correctness and confidence. Auto-accept fixes with >= 95% confidence. Skip low-confidence fixes with an explanation reply.
+
+4. **Apply fixes**: For each accepted comment, edit the target file (use section headers as anchors). If the file has a `.claude/` mirror or canonical `skills/` copy, apply to both. Commit, push.
+
+5. **Reply to every comment**: Fixed → `Fixed in {sha}.` Rejected → `Reviewed — not applying because {reason}.` Questions → direct answer.
+
+6. **Resolve all threads**: Use GraphQL `resolveReviewThread` mutation for each thread.
+
+7. **Merge the PR**: `gh pr merge {PR_NUMBER} --squash --delete-branch`. If direct merge fails (branch protection), fall back to `--auto`. Verify state is `MERGED`.
+
+**Loop limit**: Maximum 2 review-fix cycles. After that, leave PR for manual review.
+**`--no-merge` flag**: If set, skip the merge step and report "PR left open per --no-merge flag."
+
+### Phase 9: Summary
+
+Report what was accomplished: searches run, findings count, gaps identified, issues created, files changed, PR URL, review status, fixes applied, threads resolved, auto-merge state. If any phase was skipped or failed, note it clearly.
 
 ## Edge Cases
 
