@@ -63,7 +63,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **Plan mode:** Displays step-by-step plan before execution for review
 - **Background delegation:** Prefix prompt with `&` to delegate to cloud coding agent
 - **Specialized sub-agents:** Explore, Task, Code Review, Plan
-- **Model support:** Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
+- **Model support:** Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ (deprecated 2026-03-26)
 - Available to all paid Copilot subscribers (Pro, Business, Enterprise)
 
 ### GitHub Models API
@@ -80,6 +80,8 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
+- **v0.33.0 (2026-04-14):** Granular PRs/issues toolsets, resolve review threads tool, `list_commits` gets `path`/`since`/`until` params, configurable server name/title via translation strings, OSS HTTP logging adapter, static CLI flags as per-request filter upper bound
+- **v0.33.1 (2026-04-14):** Hotfix release
 - **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
 
 ### Claude Code
