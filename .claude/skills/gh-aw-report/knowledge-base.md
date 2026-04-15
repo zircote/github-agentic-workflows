@@ -49,7 +49,7 @@
 - **Modes**: Plan mode (shows plan first), Autopilot mode (fully autonomous)
 - **Background delegation**: prefix prompt with `&` to send to cloud coding agent
 - **Sub-agents**: Explore (codebase analysis), Task (build/test), Code Review, Plan
-- **Models**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
+- **Models**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ [SUPERSEDED by 2026-04-15 — deprecated 2026-03-26]
 - **January 2026 changelog**: Enhanced agents, context management, new install methods
 
 ### GitHub Copilot Workspace / Agent Mode (as of 2026-04-14)
@@ -83,6 +83,26 @@
 - AWF (Agent Workflow Firewall) restricts network egress
 - Safe Outputs subsystem handles write operations in separate permission-controlled jobs
 - Threat detection job runs per-workflow: prompt injection, credential leaks, malicious code
+
+## [2026-04-15] Daily Intelligence Update
+
+### 2026-04-15 -- version -- gh-aw CLI v0.68.3
+Released 2026-04-14. Model-not-supported detection, shared import `checkout`/`env` fields, TBT metric, OTEL token breakdowns, 5 push_signed_commits.cjs fixes.
+
+### 2026-04-15 -- version -- GitHub MCP Server v0.33.0/v0.33.1
+Released 2026-04-14. Granular PRs/issues toolsets, resolve review threads tool, `list_commits` `path`/`since`/`until` params, configurable server name.
+
+### 2026-04-15 -- deprecation -- Gemini 3 Pro deprecated
+Deprecated 2026-03-26 across all GitHub Copilot experiences. Use Gemini 3 Ultra.
+
+### 2026-04-15 -- feature -- Agent HQ and model selection
+Agent HQ: multi-vendor agents on GitHub. Model selection for Claude/Codex on github.com (2026-04-14).
+
+### 2026-04-15 -- feature -- Copilot data residency + FedRAMP
+US/EU data residency (2026-04-13). FedRAMP Moderate for US gov. `copilot --remote` public preview.
+
+### 2026-04-15 -- ecosystem -- GitHub Actions April changes
+Workflow reruns capped at 50 (2026-04-10). OIDC for Dependabot/code scanning. Code scanning→Issues linking. Async SBOM exports.
 
 ---
 <!-- Append new entries above this line, newest first -->

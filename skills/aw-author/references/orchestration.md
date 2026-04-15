@@ -294,7 +294,7 @@ When specifying `engine.model`, the following values are available as of Copilot
 | `copilot` | `claude-opus` | Claude Opus 4.6 — highest reasoning capability |
 | `copilot` | `claude-sonnet` | Claude Sonnet 4.6 — balanced speed/capability |
 | `copilot` | `gpt-5-codex` | GPT-5.3-Codex — code-optimized |
-| `copilot` | `gemini-pro` | Gemini 3 Pro — multimodal |
+| `copilot` | `gemini-pro` | ~~Gemini 3 Pro~~ **DEPRECATED 2026-03-26** — use `gemini-ultra` (Gemini 3 Ultra) |
 | `claude` | *(default)* | Claude Sonnet 4.6 via direct Anthropic API |
 
 For reasoning-heavy patterns (security review, complex triage), prefer `claude-opus` or enable `thinking: true` with the `claude` engine.
