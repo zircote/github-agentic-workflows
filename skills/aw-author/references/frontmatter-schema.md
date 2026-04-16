@@ -505,7 +505,7 @@ if: github.event.action == 'labeled' && contains(github.event.issue.labels.*.nam
 - **Type:** boolean
 - **Required:** no
 - **Default:** `true`
-- **Description:** Controls whether the activation job verifies that the frontmatter hash in the workflow matches its compiled `.lock.yml`.
+- **Description:** Sub-field of `on:`. Controls whether the activation job verifies that the frontmatter hash in the workflow matches its compiled `.lock.yml`.
 
 When `false`, disables the hash check step. This is needed when workflow files are managed outside the default repository context — for example, cross-repo org rulesets where the `.md` source and the compiled `.lock.yml` live in different repositories.
 
@@ -1582,7 +1582,7 @@ safe-outputs:
 
 ---
 
-## 8. Steps & Post-Steps
+## 8. Pre-Steps, Steps & Post-Steps
 
 ### `pre-steps` {#pre-steps}
 

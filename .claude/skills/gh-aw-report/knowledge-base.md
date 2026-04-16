@@ -108,29 +108,29 @@ Workflow reruns capped at 50 (2026-04-10). OIDC for Dependabot/code scanning. Co
 
 ## [2026-04-16] Daily Intelligence Update
 
-### gh-aw CLI v0.68.3 — New Frontmatter Fields
+### 2026-04-16 -- feature -- gh-aw v0.68.3 New Frontmatter Fields
 - **`pre-steps:`** — Runs custom steps at job start, **before checkout**. Use for token minting or pre-checkout setup. Outputs accessible via `${{ steps.<id>.outputs.<name> }}` for use in `checkout.github-token` to avoid masked-value cross-job boundary issues. Same security restrictions as `steps:`.
 - **`run-install-scripts:`** — Boolean (default: `false`). Allows npm pre/post install scripts. Default adds `--ignore-scripts` to all npm install commands (supply chain protection). Setting `true` disables globally; per-runtime scope via `runtimes.node.run-install-scripts`. Compile-time warning (strict mode: error).
 - **`on.stale-check:`** — Boolean nested under `on:`, default `true`. When `false`, disables the frontmatter hash check in the activation job. Required for cross-repo org ruleset deployments.
-- Source: PR #26607 in github/gh-aw ("Sync github-agentic-workflows.md with v0.68.3", expires 2026-04-18)
+- Source: PR #26607 in github/gh-aw ("Sync github-agentic-workflows.md with v0.68.3")
 
-### gh-aw Security Fixes (active PRs 2026-04-16)
+### 2026-04-16 -- security -- gh-aw Security Fixes
 - **Steganographic injection**: PR #26596 strips markdown link title text to close injection channel
 - **XPIA @mentions**: PR #26589 sanitizes @mentions in `create_issue` body
 - **cache-memory sanitization**: PR #26587 adds pre-agent working-tree sanitization (neutralizes planted executables/disallowed files)
 - **Lock file integrity schema v4**: PR #26594 extends integrity check to detect post-compilation YAML tampering
 
-### GitHub MCP Server (as of 2026-04-16)
+### 2026-04-16 -- version -- GitHub MCP Server v0.33.0/v0.33.1
 - **v0.33.0** (2026-04-14): Granular PRs/issues toolsets, `resolve_review_thread` tool, `list_commits` path/since/until params, configurable server name/title via translation strings, OSS HTTP logging adapter
 - **v0.33.1** (2026-04-14): Hotfix release
 
-### Claude Code (as of 2026-04-16)
+### 2026-04-16 -- feature -- Claude Code Remote Tasks
 - **Remote Tasks** (launched March 20, 2026): Define GitHub repo + prompt + schedule → Claude runs autonomously on Anthropic cloud infrastructure. Supports cron scheduling.
 - **Remote Sessions**: Start task, close laptop, session continues on Anthropic infrastructure
 - **Open-sourced**: Agent layer at `anthropics/claude-code`
 - **v2.1.76** (March 14, 2026): Enhanced MCP elicitation support, improved tool discovery
 
-### GitHub Copilot (as of 2026-04-16)
+### 2026-04-16 -- feature -- Copilot Cloud Agent Per-Org Control
 - **Copilot cloud agent per-org control** (April 15, 2026): Can now be enabled for selected organizations via AI Controls page → "Agent" → "Copilot Cloud Agent"
 - **REST API version 2026-03-10**: Available with breaking changes to the REST API
 
