@@ -1,6 +1,6 @@
 # gh-aw Architecture Reference
 
-> Last updated: 2026-04-14. This file captures stable architectural facts about the
+> Last updated: 2026-04-16. This file captures stable architectural facts about the
 > GitHub Agentic Workflows system to reduce web searches on known-stable information.
 
 ## System Overview
@@ -94,6 +94,15 @@ that traditional deterministic CI cannot handle.
   fix PR via coding agent automatically
 - Assign GitHub issue to Copilot → autonomous background work → PR opened for review
 - Waitlist removed for Pro/Business/Enterprise (early 2026)
+
+## Claude Code (Anthropic)
+
+- Anthropic's CLI agentic coding tool, integrates with GitHub via MCP servers
+- Can serve as the AI engine in gh-aw workflows (alternative to Copilot CLI)
+- **Open-sourced** (2026): Agent layer at `anthropics/claude-code`
+- **Remote Tasks** (launched March 20, 2026): Define a GitHub repo + prompt + cron schedule → Claude runs autonomously on Anthropic's cloud infrastructure; cron scheduling supported
+- **Remote Sessions**: Start a task locally, close laptop; session continues on Anthropic infrastructure
+- Directly comparable to gh-aw scheduled workflows for Claude-engine use cases — a native Anthropic alternative that does not require GitHub Actions
 
 ## Continuous AI Paradigm
 

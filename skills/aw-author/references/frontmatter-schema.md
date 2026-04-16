@@ -56,12 +56,14 @@ gh-aw workflow files use YAML frontmatter delimited by `---` markers. This is th
 | `playwright` | [Tools](#5-tools-tools) | [link](#playwright-tool) |
 | `plugins` | [Imports & Dependencies](#10-imports--dependencies) | [link](#plugins) *(deprecated)* |
 | `post-steps` | [Steps & Post-Steps](#8-steps--post-steps) | [link](#post-steps) |
+| `pre-steps` | [Steps & Post-Steps](#8-steps--post-steps) | [link](#pre-steps) |
 | `push-to-pull-request-branch` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#push-to-pull-request-branch) |
 | `reaction` | [Triggers](#2-triggers-on) | [link](#reaction) |
 | `remove-labels` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#remove-labels) |
 | `repo-memory` | [Tools](#5-tools-tools) | [link](#repo-memory-tool) |
 | `reply-to-pull-request-review-comment` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#reply-to-pull-request-review-comment) |
 | `resolve-pull-request-review-thread` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#resolve-pull-request-review-thread) |
+| `run-install-scripts` | [Engine Configuration](#4-engine-configuration-engine) | [link](#run-install-scripts) |
 | `run-name` | [Engine Configuration](#4-engine-configuration-engine) | [link](#run-name) |
 | `runs-on` | [Engine Configuration](#4-engine-configuration-engine) | [link](#runs-on) |
 | `safe-outputs` | [Safe Outputs](#7-safe-outputs-safe-outputs) | [link](#safe-outputs-root) |
@@ -71,6 +73,7 @@ gh-aw workflow files use YAML frontmatter delimited by `---` markers. This is th
 | `services` | [Container & Services](#11-container--services) | [link](#services) |
 | `skip-if-match` | [Triggers](#2-triggers-on) | [link](#skip-if-match) |
 | `skip-if-no-match` | [Triggers](#2-triggers-on) | [link](#skip-if-no-match) |
+| `stale-check` | [Triggers](#2-triggers-on) | [link](#stale-check) |
 | `source` | [Workflow Identity](#1-workflow-identity) | [link](#source) |
 | `startup-timeout` | [Tools](#5-tools-tools) | [link](#startup-timeout) |
 | `steps` | [Steps & Post-Steps](#8-steps--post-steps) | [link](#steps) |
@@ -497,6 +500,22 @@ if: github.event.action == 'labeled' && contains(github.event.issue.labels.*.nam
 - **Gotchas:** Uses GitHub Actions expression syntax without the `${{ }}` wrapper.
 - **Cross-references:** `production-gotchas.md` — `if` guard
 
+#### `stale-check` {#stale-check}
+
+- **Type:** boolean
+- **Required:** no
+- **Default:** `true`
+- **Description:** Controls whether the activation job verifies that the frontmatter hash in the workflow matches its compiled `.lock.yml`.
+
+When `false`, disables the hash check step. This is needed when workflow files are managed outside the default repository context — for example, cross-repo org rulesets where the `.md` source and the compiled `.lock.yml` live in different repositories.
+
+```yaml
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  stale-check: false
+```
+
 ---
 
 ## 3. Permissions (`permissions:`)
@@ -801,6 +820,29 @@ environment: production
 environment:
   name: production
   url: "https://app.example.com"
+```
+
+### `run-install-scripts` {#run-install-scripts}
+
+- **Type:** boolean
+- **Required:** no
+- **Default:** `false`
+- **Description:** Allow npm pre/post install scripts to execute during package installation.
+
+By default, gh-aw adds `--ignore-scripts` to all generated `npm install` commands to prevent supply chain attacks via malicious install hooks. Setting this to `true` disables that protection globally for all runtimes that generate `npm install` commands.
+
+```yaml
+run-install-scripts: true
+```
+
+**⚠️ Security notice:** Emits a supply chain security warning at compile time. In `strict` mode, this is a compile error rather than a warning.
+
+**Per-runtime scope:** To limit the opt-out to a specific runtime rather than all runtimes, use:
+
+```yaml
+runtimes:
+  node:
+    run-install-scripts: true
 ```
 
 ---
@@ -1541,6 +1583,33 @@ safe-outputs:
 ---
 
 ## 8. Steps & Post-Steps
+
+### `pre-steps` {#pre-steps}
+
+- **Type:** object | array
+- **Required:** no
+- **Default:** none
+- **Description:** Custom workflow steps that run at the **very beginning** of the agent job, before the repository is checked out.
+
+```yaml
+pre-steps:
+  - name: Mint app token
+    id: app-token
+    uses: actions/create-github-app-token@v2
+    with:
+      app-id: ${{ vars.APP_ID }}
+      private-key: ${{ secrets.APP_KEY }}
+```
+
+**Use cases:**
+- **Token minting** that must happen before checkout (avoids masked-value cross-job boundary issues when the token is used in `checkout.github-token`)
+- Environment preparation that must precede repository access
+
+**Step outputs** are available via `${{ steps.<id>.outputs.<name> }}` and can be referenced in `checkout.github-token` and other pre-checkout fields.
+
+Same security restrictions apply as for `steps:` — runs outside the firewall sandbox with standard GitHub Actions security but no network egress controls.
+
+- **Cross-references:** `production-gotchas.md` — post-steps feature; see also `steps` and `post-steps`
 
 ### `steps`
 
