@@ -307,6 +307,8 @@ tools:
 | `scope` | string | `workflow` | `workflow` or `repo` |
 | `allowed-extensions` | array | `[".json", ".jsonl", ".txt", ".md", ".csv"]` | Allowed file types |
 
+**Pre-agent working-tree sanitization:** Before the agent job starts, `cache-memory` automatically scans the restored cache for planted executables and disallowed file types. Any neutralized files are logged as warnings in the workflow output. This protects against cache-poisoning attacks where a malicious actor could insert executable files or disallowed content into the cache between workflow runs.
+
 ### Repo Memory (`repo-memory:`)
 
 ```yaml
