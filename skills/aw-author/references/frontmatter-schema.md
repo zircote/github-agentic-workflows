@@ -633,12 +633,14 @@ The `model:` sub-field accepts these values when using the `copilot` engine:
 
 | Model Value | Engine | Description |
 |-------------|--------|-------------|
-| `claude-opus` | Opus 4.6 | Highest-capability Anthropic model |
+| `claude-opus` | Opus 4.7 (CLI ≥ v1.0.29) / Opus 4.6 (older) | Highest-capability Anthropic model |
 | `claude-sonnet` | Sonnet 4.6 | Balanced speed and capability |
 | `gpt-5-codex` | GPT-5.3-Codex | OpenAI code-specialized model |
-| `gemini-pro` | Gemini 3 Pro | Google multimodal model |
+| ~~`gemini-pro`~~ | ~~Gemini 3 Pro~~ | **Deprecated 2026-03-26** — use `gemini-ultra` |
 
 Model availability depends on Copilot subscription tier and organization policy. The `claude` engine ID uses Claude models directly via Anthropic API (with `ANTHROPIC_API_KEY`), bypassing the Copilot model selector.
+
+> **Claude Opus 4.7**: Available in Copilot CLI v1.0.29+. The `claude-opus` model value now resolves to Opus 4.7 on compatible CLI versions. The `xhigh` thinking effort level is available for Opus 4.7 in Claude Code v2.1.111+ but is not a frontmatter field.
 
 ### Engine Sub-Fields
 
