@@ -135,4 +135,26 @@ Workflow reruns capped at 50 (2026-04-10). OIDC for Dependabot/code scanning. Co
 - **REST API version 2026-03-10**: Available with breaking changes to the REST API
 
 ---
+
+## [2026-04-17] Daily Intelligence Update
+
+### 2026-04-17 -- version -- GitHub Copilot CLI v1.0.31
+Latest (2026-04-16). Eight releases since April 13. Key: v1.0.29 adds Claude Opus 4.7 support, remote MCP server `type` field optional (defaults to `http`), `COPILOT_AGENT_SESSION_ID` env var. v1.0.25 adds MCP server install from registry, `/env` command showing loaded environment. v1.0.23 adds `--mode`/`--autopilot`/`--plan` flags.
+
+### 2026-04-17 -- version -- Claude Code v2.1.112
+Latest (2026-04-16). v2.1.111: Claude Opus 4.7 `xhigh` effort level, interactive `/effort` slider, Auto mode for Max subscribers. v2.1.108: `ENABLE_PROMPT_CACHING_1H` env var (1-hour cache TTL). v2.1.105: PreCompact hook (block compaction with exit code 2), background monitors via `monitors` manifest key, `EnterWorktree` `path` param. v2.1.101: OS CA cert store trust by default.
+
+### 2026-04-17 -- feature -- Copilot Autopilot Mode + Nested Subagents (April 8, 2026)
+**Autopilot mode** (public preview): Agents approve own tool calls, auto-retry, work autonomously to completion. Available Pro/Business/Enterprise, not free. **Nested subagents**: Main agent spawns child agents via `chat.subagents.allowInvocationsFromSubagents`. Configurable thinking effort for Claude Sonnet 4.6 and GPT-5.4. MCP servers in VS Code now sync across Copilot CLI and Claude agent sessions. Weekly stable releases (v1.111–v1.115).
+
+### 2026-04-17 -- feature -- GitHub Actions IANA Timezone + Environment Deployment Control
+**IANA timezone for cron**: Add `timezone` field alongside cron expression. **Environments without deployment**: Use `deployment: false` to access environment without creating a deployment record. **Early April**: Service container `entrypoint`/`command` overrides; Azure VNET failover for hosted runners (public preview).
+
+### 2026-04-17 -- security -- GitHub MCP Guard Policy GA
+`tools.github` repos/min-integrity guard policy out of experimental. DIFC (Decentralized Information Flow Control) guards enforce secrecy/integrity labels per request at MCP Gateway. `gh aw logs --filtered-integrity` flag for filtering runs with DIFC integrity events. MCP remote server connections auto-retry on transient network failures.
+
+### 2026-04-17 -- deprecation -- gemini-pro model deprecated (reference file gap)
+`gemini-pro` (Gemini 3 Pro) deprecated 2026-03-26 across Copilot CLI model selector. `frontmatter-schema.md` models table still lists it without deprecation notice — gap confirmed, fix in today's PR.
+
+---
 <!-- Append new entries above this line, newest first -->
