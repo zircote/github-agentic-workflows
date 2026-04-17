@@ -73,13 +73,19 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 
 ### GitHub MCP Server
 - **Repository**: `github/github-mcp-server`
+- **Current stable version:** v1.0.0 (released 2026-04-16) — first stable major release
 - Provides GitHub API tools via MCP protocol
 - Used by Claude Code, Copilot, and other MCP-compatible clients
 - **Projects toolset:** Consolidated `projects_list`, `projects_get`, `projects_write` tools (~50% token reduction, ~23,000 tokens saved)
-- **New tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`
+- **Copilot tools:** `get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot` (in default `copilot` toolset)
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
-- **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
-- **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
+- **`resolve_review_thread` tool:** Resolve PR review threads (added v0.33.0)
+- **`set_issue_fields` tool:** Set/update/delete org-level custom field values on issues (in `issues_granular` toolset, added v1.0.0)
+- **Granular toolsets:** `pull_request_granular` and `issues_granular` — OSS toolsets for fine-grained PR/issue operations (added v0.33.0)
+- **`list_commits` enhancements:** Added `path`, `since`, and `until` parameters (added v0.33.0)
+- **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header (still active for early experiments)
+- **MCP Apps:** UI rendering support for select tools; graduated from insiders to feature flag `remote_mcp_ui_apps` (v1.0.0)
+- **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding; `X-MCP-Features` header validated via `HeaderAllowedFeatureFlags` (v1.0.0)
 - **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
 
 ### Claude Code

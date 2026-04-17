@@ -111,7 +111,9 @@ tools:
 | `context` | Repository and event context |
 | `repos` | Code, commits, branches, files |
 | `issues` | Issue read/analysis |
+| `issues_granular` | Granular issue field operations (org custom fields) — feature flag `issues_granular` |
 | `pull_requests` | PR read/analysis |
+| `pull_request_granular` | Granular PR operations (resolve review threads, fine-grained writes) |
 | `users` | User profile information |
 | `actions` | Workflow runs, logs |
 | `code_security` | Security advisories, scanning |
@@ -127,6 +129,7 @@ tools:
 | `secret_protection` | Secret scanning |
 | `security_advisories` | Security advisory management |
 | `stargazers` | Star information |
+| `copilot` | Copilot job management (`get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`) |
 
 ### Default Toolsets
 

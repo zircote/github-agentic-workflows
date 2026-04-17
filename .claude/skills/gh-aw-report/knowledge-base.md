@@ -6,6 +6,25 @@
 
 ---
 
+## [2026-04-17] Daily Intelligence Update
+
+### GitHub MCP Server v1.0.0 — GA Release (2026-04-16)
+- **First stable major release**: GitHub MCP Server reached v1.0.0 on April 16, 2026
+- **`set_issue_fields` tool**: Sets/updates/deletes org-level custom field values on issues; feature-flagged under `issues_granular` toolset
+- **MCP Apps feature flag**: `remote_mcp_ui_apps` — MCP Apps UI graduated from insiders-only to a proper feature flag for broader rollout
+- **`HeaderAllowedFeatureFlags`**: HTTP mode now validates `X-MCP-Features` header flags via enforcement in v1.0.0
+- **modelcontextprotocol/go-sdk v1.5.0** used in v1.0.0
+- Source: https://github.com/github/github-mcp-server/releases/tag/v1.0.0
+
+### GitHub MCP Server v0.33.0 additions (2026-04-14)
+- **`resolve_review_thread` tool**: Resolves PR review threads
+- **`list_commits` new params**: `path`, `since`, `until`
+- **Granular OSS toolsets**: `pull_request_granular` and `issues_granular` toolsets now open-source
+- **Configurable server name/title** via translation strings
+- Source: https://github.com/github/github-mcp-server/releases/tag/v0.33.0
+
+---
+
 ## [2026-04-14] Bootstrap Entry — Initial Research
 
 ### gh-aw CLI
