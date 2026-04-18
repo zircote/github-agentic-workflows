@@ -9,6 +9,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **Install**: `gh extension install github/gh-aw`
 - **Purpose**: Compile markdown workflow definitions into GitHub Actions `.lock.yml` files
 - **Key commands**: `gh aw compile`, `gh aw validate`, `gh aw upgrade`, `gh aw mcp inspect`, `gh aw mcp list`
+- **AWF (Actions Workflow Framework)**: Default version **v0.25.24** (as of 2026-04-18)
 
 ### Workflow File Structure
 - **Source**: `.github/workflows/<name>.md` — markdown with YAML frontmatter
@@ -80,7 +81,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
-- **MCP Gateway:** Centralized access management for MCP servers (v0.1.9 as of 2026-04-14)
+- **MCP Gateway:** Centralized access management for MCP servers (**v0.2.24** as of 2026-04-18; runs as runner user with uid/gid Docker mapping since v0.2.x)
 
 ### Claude Code
 - Anthropic's CLI agentic coding tool
@@ -100,3 +101,12 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - `strict: false` — required for custom domains and untrusted input
 - `lockdown` settings for public repositories
 - Network firewall with ecosystem identifiers: `defaults`, `github`, `containers`, `node`, `python`
+
+## Cross-Repository Context
+
+### SideRepoOps Context (workflowRepo vs eventRepo)
+gh-aw provides a native `SideRepoOps` context that distinguishes between:
+- **`workflowRepo`**: The repository where the gh-aw workflow is defined
+- **`eventRepo`**: The repository that triggered the event (may differ in cross-repo scenarios)
+
+This context is used internally for comment scripts and for cross-repository safe-output operations. The distinction matters when using `target-repo` or `allowed-repos` in safe-outputs, or when writing workflows that operate across repositories. Refactored for native context in gh-aw PR #26953 (2026-04-18).

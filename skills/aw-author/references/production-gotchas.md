@@ -373,3 +373,25 @@ Repositories with branch protection rulesets that require **signed commits** now
 **Current behavior (early 2026+):** gh-aw correctly signs commits on newly created branches. No configuration change needed.
 
 **Edge case:** Custom tokens (`github-token:` in safe-outputs) using a different App identity may still require signing configuration on the target App.
+
+---
+
+## "Redact secrets in logs" Warnings from MCP Gateway
+
+### Symptom
+
+Persistent `"Redact secrets in logs"` warnings appearing in agent workflow logs at MCP gateway startup.
+
+### Root Cause
+
+MCP gateway Docker container was running as a different user than the GitHub Actions runner, causing file permission/ownership mismatches that triggered GitHub Actions' secret redaction heuristics.
+
+### Resolution
+
+**Fixed in gh-aw MCP Gateway v0.2.x** — gateway now runs as runner user with proper uid/gid Docker socket group mapping (gh-aw PR #26658, merged 2026-04-18).
+
+If still seeing this warning:
+1. Update gh-aw extension: `gh aw upgrade`
+2. Verify MCP gateway is v0.2.24+ by checking workflow logs for the MCP gateway version line.
+
+This was a cosmetic/log-noise issue only — workflow functionality was not impacted.

@@ -127,6 +127,9 @@ tools:
 | `secret_protection` | Secret scanning |
 | `security_advisories` | Security advisory management |
 | `stargazers` | Star information |
+| `copilot` | Copilot job management (`get_copilot_job_status`, `assign_copilot_to_issue`, `create_pull_request_with_copilot`) — default toolset since v0.32.0 |
+| `pull_request_granular` | Fine-grained PR operations (`resolve_review_thread`) — feature flag `pull_request_granular`, added v0.33.0 |
+| `issues_granular` | Granular issue field operations (`set_issue_fields`) — feature flag `issues_granular`, added v0.33.0 |
 
 ### Default Toolsets
 
@@ -169,6 +172,20 @@ tools:
 - Omit field — current repo only
 
 **Token precedence:** GitHub App → `github-token` → `GH_AW_GITHUB_MCP_SERVER_TOKEN` → `GH_AW_GITHUB_TOKEN` → `GITHUB_TOKEN`
+
+### Notable GitHub MCP Tools (v0.32.0–v1.0.0)
+
+New and notable tools added in recent GitHub MCP Server releases:
+
+| Tool | Toolset | Version | Description |
+|------|---------|---------|-------------|
+| `get_copilot_job_status` | `copilot` | v0.32.0 | Get status of a Copilot coding agent job |
+| `assign_copilot_to_issue` | `copilot` | v0.32.0 | Assign Copilot to work on an issue |
+| `create_pull_request_with_copilot` | `copilot` | v0.32.0 | Create a PR with Copilot; supports `base_ref` for stacked PRs |
+| `resolve_review_thread` | `pull_request_granular` | v0.33.0 | Resolve a PR review thread by thread ID |
+| `set_issue_fields` | `issues_granular` | v1.0.0 | Set/update/delete org-level custom field values on issues |
+
+**`list_commits` parameter additions** (v0.33.0): Added `path` (filter by file), `since` (ISO 8601 start date), and `until` (ISO 8601 end date) parameters to filter commit history.
 
 ### App Token Permission Inheritance (CRITICAL)
 

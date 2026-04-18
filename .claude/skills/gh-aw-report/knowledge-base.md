@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-04-18] Intelligence Update
+
+### GitHub MCP Server
+- **v1.0.0 released**: 2026-04-16 — first stable major release
+- **`set_issue_fields` tool** (v1.0.0): Sets/updates/deletes org-level custom field values on issues; in `issues_granular` toolset; feature-flagged under `issues_granular`
+- **MCP Apps** (v1.0.0): Graduated from insiders-only to feature flag `remote_mcp_ui_apps`; insiders mode remains for other experiments
+- **`resolve_review_thread` tool** (v0.33.0): Resolves PR review threads; in `pull_request_granular` toolset
+- **Granular toolsets** (v0.33.0): `pull_request_granular` and `issues_granular` OSS toolsets
+- **`list_commits` parameters** (v0.33.0): Added `path`, `since`, `until` filter params
+- **v0.33.1**: Patch over v0.33.0 (2026-04-14)
+
+### gh-aw Core (as of 2026-04-18)
+- **MCP Gateway**: Current default version **v0.2.24** [SUPERSEDES v0.1.9 noted 2026-04-14]
+- **AWF (Actions Workflow Framework)**: Current default version **v0.25.24**
+- **"Redact secrets in logs" fix**: MCP gateway now runs as runner user with proper uid/gid mapping; eliminates persistent log warnings (PR #26658)
+- **`create_pull_request.base_branch`**: Now honored correctly in safe-output patch generation (PR #26952)
+- **Compile hardening**: `gh aw compile` now hardens MCP stdout handling (PR #26968)
+- **Copilot CLI pinned**: Default Copilot CLI version is v1.0.21 (PR #26963)
+- **`SideRepoOps` context**: Native context providing explicit `workflowRepo` vs `eventRepo` distinction for comment scripts (PR #26953)
+
+---
+
 ## [2026-04-14] Bootstrap Entry — Initial Research
 
 ### gh-aw CLI
