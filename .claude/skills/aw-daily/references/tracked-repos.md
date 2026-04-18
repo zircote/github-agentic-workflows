@@ -17,7 +17,7 @@ GitHub repositories queried for activity since the last intelligence report. Act
 ### Determine last report date
 
 ```bash
-LAST_DATE=$(grep -oP '^\#\#\# \K\d{4}-\d{2}-\d{2}' skills/gh-aw-report/knowledge-base.md | tail -1)
+LAST_DATE=$(grep -oP '^\#\#\# \K\d{4}-\d{2}-\d{2}' .claude/skills/gh-aw-report/knowledge-base.md | tail -1)
 # Fallback to 7 days ago if no entries
 LAST_DATE=${LAST_DATE:-$(date -d '7 days ago' +%Y-%m-%d 2>/dev/null || date -v-7d +%Y-%m-%d)}
 ```

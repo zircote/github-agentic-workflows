@@ -1,142 +1,129 @@
 ---
 name: gh-aw-report
-description: >
-  Generates a comprehensive daily intelligence report on the GitHub Agentic Workflows
-  (gh-aw) ecosystem. Use when asked to produce a gh-aw report, run a daily GitHub
-  agentic workflows briefing, check what's new in GitHub agentic workflows, GitHub
-  Actions AI updates, GitHub Copilot Workspace news, GitHub Models API changes,
-  MCP GitHub integration updates, Claude Code GitHub integration status, or
-  "what's trending in agentic CI/CD". Also triggers on: "gh-aw status",
-  "agentic workflows digest", "agentic CI report", "GitHub AI ecosystem update".
+description: |
+  Daily intelligence reporting for the GitHub Agentic Workflows (gh-aw) ecosystem. Executes 8+ targeted web searches, synthesizes findings into a structured Markdown report, updates the persistent knowledge base, and optionally posts to GitHub Discussions. Triggers on: "aw-report", "gh-aw report", "intelligence sweep", "ecosystem report", "daily briefing".
 ---
 
-# gh-aw-report: Daily GitHub Agentic Workflows Intelligence
+# gh-aw Ecosystem Intelligence Report
 
-Produce a comprehensive, dated intelligence report on the GitHub Agentic Workflows
-ecosystem. This skill directs the agent to gather current information from the web,
-synthesize it, and persist key findings to a knowledge base.
+You are an intelligence analyst for the GitHub Agentic Workflows (gh-aw) ecosystem. Your mission is to produce a comprehensive, dated intelligence report covering the full gh-aw landscape.
 
-## Scope
+## Covered Domains
 
-The "GitHub Agentic Workflows" (gh-aw) space covers:
+1. **GitHub Agentic Workflows** — `github/gh-aw`, `gh aw` CLI
+2. **GitHub Actions AI Features** — AI-powered Actions, deprecations
+3. **GitHub Copilot Workspace** — browser-based agentic coding
+4. **GitHub Copilot Agent Mode** — IDE and CLI agentic coding
+5. **GitHub Models API** — model marketplace and API
+6. **GitHub MCP Server** — `github/github-mcp-server`
+7. **Claude Code × GitHub** — Claude Code integrations
+8. **Agentic CI/CD Community** — patterns, tools, ecosystem
 
-- **GitHub Agentic Workflows** — the `github/gh-aw` repository, `gh aw` CLI, compiled
-  Markdown workflows, safe-outputs system, Agent Workflow Firewall (AWF), MCP Gateway
-- **GitHub Actions** — new runner features, action deprecations, pricing changes,
-  immutable actions, cache migrations, OIDC updates
-- **GitHub Copilot Workspace** — agent mode, coding agent, agentic code review, IDE
-  integrations (VS Code, JetBrains), Autopilot mode, sub-agents
-- **GitHub Copilot CLI** — GA status, plan/autopilot modes, specialized agent delegation,
-  model support (Claude Opus/Sonnet, GPT, Gemini), `& background` delegation
-- **GitHub Models** — model catalog changes, API updates, rate limits, new model arrivals
-- **GitHub MCP Server** — `github/github-mcp-server` releases, new tools, OAuth changes,
-  Projects toolset, insiders mode, enterprise HTTP mode
-- **Claude Code on GitHub** — `CLAUDE.md` support in Copilot, Claude as gh-aw agent,
-  Claude Code MCP integrations, `steipete/claude-code-mcp`
-- **Agentic CI/CD patterns** — "continuous AI" paradigm, community sample workflows
-  (`githubnext/agentics`), community adoption, blog posts, conference talks
-- **Security** — AWF network egress control, prompt injection detection, safe outputs,
-  permission models, MCP Gateway
+## Execution Flow
 
-## Execution Steps
+### Phase 1: Load Context
 
-### Step 1 — Web Research (run ALL searches)
+1. Read the knowledge base at `.claude/skills/gh-aw-report/knowledge-base.md` to understand the current state of knowledge
+2. Read `.claude/skills/gh-aw-report/references/gh-aw-architecture.md` for stable architecture facts
+3. Read `.claude/skills/gh-aw-report/references/search-queries.md` for the query library
+4. Determine today's date with `date +%Y-%m-%d`
 
-Execute the following searches. Do not skip any. Use today's date in queries where noted.
+### Phase 2: Intelligence Sweep
 
-1. `site:github.blog/changelog github agentic workflows` — Official changelog entries
-2. `"gh-aw" OR "github agentic workflows" new features breaking changes 2026` — Broad news
-3. `github/gh-aw releases issues discussions 2026` — Repo-level activity
-4. `github MCP server releases changelog 2026` — MCP server updates
-5. `github copilot workspace agent mode updates 2026` — Copilot workspace news
-6. `github copilot CLI agentic features 2026` — Copilot CLI news
-7. `"continuous AI" github agentic CI/CD community 2026` — Community & ecosystem
-8. `claude code github integration CLAUDE.md AGENTS.md 2026` — Claude-specific integration
+Execute the **8 primary sweep queries** from `references/search-queries.md` using WebSearch. For each query:
 
-For each search, extract: new features, version numbers, deprecations, breaking changes,
-notable issues, community sentiment, and recommended actions.
+1. Run the web search
+2. Extract relevant findings: versions, releases, announcements, deprecations, breaking changes, new features, community patterns
+3. Discard noise (old results, unrelated matches, marketing fluff)
+4. Note the source URL for each finding
 
-### Step 2 — Read the knowledge base
+If a domain yields particularly rich results, run additional deep-dive queries from the query library.
 
-Read `${CLAUDE_PLUGIN_ROOT}/skills/gh-aw-report/knowledge-base.md` to load prior context.
-Cross-reference search findings with existing entries. Flag anything that contradicts or
-supersedes prior knowledge.
+### Phase 3: Synthesize Report
 
-### Step 3 — Compose the Report
+Produce a structured Markdown report with these sections:
 
-Write a dated Markdown report. Today's date determines the filename.
-
-**Report structure** (use exactly these section headers):
-
-```
-# GitHub Agentic Workflows — Intelligence Report: YYYY-MM-DD
+```markdown
+# gh-aw Ecosystem Intelligence Report — YYYY-MM-DD
 
 ## Executive Summary
-3–5 sentences. What matters most today. Lead with the highest-signal finding.
+<!-- 3-5 bullet points: most important findings across all domains -->
 
-## New Features & Releases
-For each item: component name, version/date, what changed, impact assessment.
-Subsections by product area: gh-aw CLI, GitHub Actions, Copilot Workspace,
-Copilot CLI, GitHub Models, GitHub MCP Server.
+## 1. gh-aw Core
+<!-- Version updates, CLI changes, breaking changes, new features -->
 
-## Breaking Changes & Deprecations
-Explicit list. For each: what is deprecated/changed, effective date, migration path,
-severity (High/Medium/Low). Empty section is fine — write "No new breaking changes
-detected." rather than omitting.
+## 2. GitHub Actions AI
+<!-- Platform changes, new features, deprecations affecting agentic workflows -->
 
-## Trending Issues & Community Discussion
-Top 3–5 items from GitHub Discussions, HN, DEV Community, Twitter/X, blog posts.
-Include link, sentiment summary, and why it matters.
+## 3. Copilot Workspace
+<!-- New capabilities, changes, availability updates -->
 
-## Ecosystem Tool Updates
-MCP integrations, Claude Code, third-party action runners, Agent Package Manager (APM),
-`githubnext/awesome-continuous-ai`, community workflow packs.
+## 4. Copilot Agent Mode
+<!-- IDE/CLI agent updates, new tools, model changes -->
 
-## Notable PRs & Commits
-From `github/gh-aw`, `github/github-mcp-server`, `github/copilot-cli` (if public).
-Title, link if available, brief description of significance.
+## 5. GitHub Models API
+<!-- New models, API changes, deprecations -->
+
+## 6. GitHub MCP Server
+<!-- Releases, new tools, protocol changes -->
+
+## 7. Claude Code × GitHub
+<!-- Integration updates, new features, MCP improvements -->
+
+## 8. Agentic CI/CD Community
+<!-- New tools, patterns, blog posts, community developments -->
+
+## Deprecation Watch
+<!-- Active deprecations with timelines and migration guidance -->
 
 ## Recommended Actions
-Bulleted list of concrete next steps for a team building on gh-aw today.
-Examples: "Upgrade to gh aw v0.X to get signed-commit support on new branches",
-"Replace plugins: field with dependencies: field (use gh aw fix --write)", etc.
+<!-- Specific actions for maintainers of gh-aw workflows -->
 
 ## Sources
-All URLs consulted, as markdown links.
+<!-- Numbered list of all URLs referenced in the report -->
 ```
 
-### Step 4 — Save the report
+### Phase 4: Save Report
 
-Save the complete report to:
-```
-outputs/gh-aw-reports/YYYY-MM-DD.md
-```
-(Replace YYYY-MM-DD with today's actual date.)
+1. Write the report to `outputs/gh-aw-reports/YYYY-MM-DD.md`
+2. If a report for today already exists, append a counter: `YYYY-MM-DD-2.md`
 
-If the directory does not exist, create it with `mkdir -p`.
+### Phase 5: Update Knowledge Base
 
-### Step 5 — Update the knowledge base
+Review findings for **stable, persistent facts** worth adding to the knowledge base:
 
-Append a dated entry to `${CLAUDE_PLUGIN_ROOT}/skills/gh-aw-report/knowledge-base.md`.
-Each entry should capture only persistent, stable facts — API changes, confirmed
-deprecations, version pinpoints, architecture decisions — not transient news.
+- Version releases (e.g., "gh-aw v0.62.0 released with X feature")
+- Deprecation announcements with timelines
+- Breaking changes
+- Architecture changes
+- New ecosystem tools or integrations
+- Security advisories
 
-Entry format:
+Append new entries to `.claude/skills/gh-aw-report/knowledge-base.md` using the format:
+
 ```markdown
-## [YYYY-MM-DD] Update
-- **gh-aw CLI**: Current stable version X.Y.Z. Key facts: ...
-- **Deprecations active**: plugins: field → dependencies:; npm @mcp/server-github deprecated
-- **Breaking changes effective**: [list any with dates]
-- **Architecture notes**: [any stable facts about how the system works]
+### YYYY-MM-DD — category — Title
+Content
 ```
 
-### Step 6 — Post to GitHub Discussions
+Do NOT add:
+- Ephemeral news or rumors
+- Speculation about unreleased features
+- Duplicate entries (check existing entries first)
+
+If a finding supersedes an existing entry, mark the old entry with `[SUPERSEDED by YYYY-MM-DD]`.
+
+### Phase 6: Post to GitHub Discussions
 
 Post the report to the project's GitHub Discussions for historical record and indexability.
 
 Use the GitHub GraphQL API via `gh api graphql` to create a discussion in the **Project News** category.
 
-The known category ID for `zircote/github-agentic-workflows` Project News: `DIC_kwDORSXBr84C61Lr`
+The known IDs for `zircote/github-agentic-workflows`:
+- **Repository ID**: Fetch with `gh api graphql -f query='{ repository(owner:"zircote", name:"github-agentic-workflows") { id } }' -q '.data.repository.id'`
+- **Project News Category ID**: `DIC_kwDORSXBr84C61Lr`
+
+Create the discussion:
 
 ```bash
 REPO_ID=$(gh api graphql -f query='{ repository(owner:"zircote", name:"github-agentic-workflows") { id } }' -q '.data.repository.id')
@@ -156,25 +143,49 @@ DISCUSSION_URL=$(gh api graphql -f query='
 echo "Discussion posted: $DISCUSSION_URL"
 ```
 
-If `--no-post` flag was passed, skip this step.
+If the `gh` CLI version supports `gh discussion create`, that works too:
 
-### Step 7 — Present to user
+```bash
+gh discussion create \
+  --repo zircote/github-agentic-workflows \
+  --category "Project News" \
+  --title "gh-aw Intelligence Report — YYYY-MM-DD" \
+  --body-file outputs/gh-aw-reports/YYYY-MM-DD.md
+```
 
-Share the link to the saved report file and the discussion URL, then give a 3-sentence
-verbal summary of the most important findings.
+Report the discussion URL in the final summary.
 
-## Quality Standards
+### Phase 7: Final Summary
 
-- Never produce placeholder or template content — every section must reflect actual
-  search findings from today's run.
-- If a search returns no relevant results for a section, write "No significant updates
-  detected in this area." — do not invent content.
-- Prefer primary sources (GitHub Changelog, GitHub Blog, official docs) over secondary.
-- Date all version numbers and facts — "as of YYYY-MM-DD".
-- Flag anything marked as "technical preview" or "beta" with a ⚠️ symbol.
+Print a summary to the user:
 
-## Reference Files
+```
+┌──────────────────────────────────────────────┐
+│ /aw-report complete                          │
+├──────────────────────────────────────────────┤
+│ Date:         YYYY-MM-DD                     │
+│ Searches:     N queries executed             │
+│ Findings:     N items across M domains       │
+│ KB Updates:   N new entries                  │
+│ Report:       outputs/gh-aw-reports/FILE.md  │
+│ Discussion:   URL                            │
+└──────────────────────────────────────────────┘
+```
 
-- `references/gh-aw-architecture.md` — stable facts about gh-aw system design
-- `references/search-queries.md` — extended query library for edge-case coverage
-- `knowledge-base.md` — persistent cross-session knowledge store
+## Report Quality Standards
+
+- Every claim must have a source URL
+- Version numbers must be exact (not "latest" or "recent")
+- Deprecation timelines must include dates when available
+- "No significant changes" is a valid finding — don't fabricate news
+- Distinguish between official announcements and community speculation
+- Flag anything that requires immediate action in the Executive Summary
+
+## Copilot Compatibility
+
+This skill is designed to work with both **Claude Code** and **GitHub Copilot**:
+
+- **Claude Code**: Uses WebSearch tool for intelligence sweep, Bash for `gh` CLI and file operations
+- **GitHub Copilot**: Uses `gh` CLI search capabilities, bash tools for file I/O and discussion posting
+- The report format, knowledge base format, and discussion posting use standard tools available to both engines
+- The `gh` CLI commands for discussion creation work identically regardless of which AI engine executes them

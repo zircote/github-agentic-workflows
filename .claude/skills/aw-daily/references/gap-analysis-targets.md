@@ -15,8 +15,8 @@ Reference files subject to automated gap analysis. Maps research domains and Git
 | Validation | `skills/aw-author/references/validation.md` | gh-aw | New error types, resolved issues, checklist gaps |
 | Markdown Body | `skills/aw-author/references/markdown-body.md` | gh-aw | Expression context changes, instruction file updates |
 | LLMs Resources | `skills/aw-author/references/llms-resources.md` | gh-aw | URL changes, new fetchable resources |
-| Architecture | `skills/gh-aw-report/references/gh-aw-architecture.md` | all | Version numbers, component additions/removals |
-| Search Queries | `skills/gh-aw-report/references/search-queries.md` | all | Query effectiveness, new search terms needed |
+| Architecture | `.claude/skills/gh-aw-report/references/gh-aw-architecture.md` | all | Version numbers, component additions/removals |
+| Search Queries | `.claude/skills/gh-aw-report/references/search-queries.md` | all | Query effectiveness, new search terms needed |
 
 ## Gap Types
 

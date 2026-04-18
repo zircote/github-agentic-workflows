@@ -1,37 +1,53 @@
 ---
-name: aw-report
-description: >
-  Generate today's GitHub Agentic Workflows intelligence report. Searches the web
-  for the latest news, features, breaking changes, and community activity across
-  the gh-aw ecosystem, then produces and saves a structured Markdown report and
-  posts it to GitHub Discussions for historical record.
-  Use with: /aw-report [--deep] [--no-post] [--domains domain1,domain2]
-tools:
-  - WebSearch
-  - WebFetch
-  - Write
-  - Bash
-  - Read
+description: Run a full gh-aw ecosystem intelligence sweep and produce a dated report
+argument-hint: "[--deep] [--no-post] [--domains domain1,domain2]"
 ---
 
-Run the `gh-aw-report` skill to produce today's GitHub Agentic Workflows intelligence report.
+# /aw-report
+
+Runs a full intelligence sweep across the GitHub Agentic Workflows ecosystem — 8+ web searches — and produces a dated Markdown report saved to `outputs/gh-aw-reports/YYYY-MM-DD.md`. Updates the persistent knowledge base and posts to GitHub Discussions.
+
+## Usage
+
+```
+/aw-report                     → Full sweep, all domains, post to Discussions
+/aw-report --deep              → Extended sweep with deep-dive queries
+/aw-report --no-post           → Generate report without posting to Discussions
+/aw-report --domains gh-aw,mcp → Only sweep specified domains
+```
 
 ## Flags
 
-Parse the argument string for these optional flags:
-
 - `--deep` — Run additional deep-dive queries from the extended query library beyond the 8 primary searches
 - `--no-post` — Skip posting to GitHub Discussions (still saves report locally and updates knowledge base)
-- `--domains` — Comma-separated list of domains to sweep. Valid: `gh-aw`, `actions`, `workspace`, `agent-mode`, `models`, `mcp-server`, `claude-code`, `community`
+- `--domains` — Comma-separated list of domains to sweep. Valid domains: `gh-aw`, `actions`, `workspace`, `agent-mode`, `models`, `mcp-server`, `claude-code`, `community`
 
-## Steps
+## Workflow
 
-1. Load the gh-aw-report skill by reading `skills/gh-aw-report/SKILL.md`.
-2. Follow the skill's instructions exactly — perform all 8 required web searches (or filtered if `--domains` specified), synthesize findings, and produce the full structured report.
-3. If `--deep` is passed, run additional deep-dive queries from `skills/gh-aw-report/references/search-queries.md`.
-4. Save the report to `outputs/gh-aw-reports/YYYY-MM-DD.md` (today's date).
-5. Update the knowledge base at `skills/gh-aw-report/knowledge-base.md`.
-6. Unless `--no-post`, post the report to GitHub Discussions in the `Project News` category at `zircote/github-agentic-workflows` using the GraphQL API (see skill Phase 6).
-7. Present the saved report link, discussion URL, and a 3-sentence summary of the most important findings.
+You are an intelligence analyst for the gh-aw ecosystem. Load the **gh-aw-report** skill to execute the full intelligence cycle:
 
-Do not produce placeholder content. Every section must reflect real search results from today's run.
+1. Load context from the knowledge base and architecture reference
+2. Execute the primary sweep (8 targeted web searches)
+3. If `--deep` is passed, run additional deep-dive queries
+4. If `--domains` is passed, filter to only the specified domains
+5. Synthesize findings into a structured report
+6. Save the report to `outputs/gh-aw-reports/YYYY-MM-DD.md`
+7. Update the knowledge base with stable facts
+8. Unless `--no-post`, post the report to GitHub Discussions in the `project-news` category at `zircote/github-agentic-workflows`
+9. Print the final summary
+
+## Examples
+
+```
+/aw-report
+# → Full sweep, saves report, updates KB, posts to Discussions
+
+/aw-report --deep
+# → Extended sweep with deep-dive queries on rich domains
+
+/aw-report --no-post --domains gh-aw,mcp-server
+# → Only sweep gh-aw core and MCP server, skip Discussions post
+
+/aw-report --deep --domains claude-code
+# → Deep dive on Claude Code × GitHub integrations only
+```
