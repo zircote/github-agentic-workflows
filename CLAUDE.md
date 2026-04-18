@@ -2,7 +2,7 @@
 
 ## Project
 
-The **aw-author** Claude Code plugin (v1.3.0) at `zircote/github-agentic-workflows`. Provides skills, commands, and reference materials for GitHub Agentic Workflow (gh-aw) authoring, plus an autonomous daily intelligence pipeline.
+The **aw-author** Claude Code plugin (v1.3.2) at `zircote/github-agentic-workflows`. Provides skills, commands, and reference materials for GitHub Agentic Workflow (gh-aw) authoring, plus an autonomous daily intelligence pipeline.
 
 ## Commands
 

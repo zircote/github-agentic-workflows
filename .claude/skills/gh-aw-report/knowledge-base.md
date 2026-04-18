@@ -71,7 +71,7 @@
 - **Modes**: Plan mode (shows plan first), Autopilot mode (fully autonomous)
 - **Background delegation**: prefix prompt with `&` to send to cloud coding agent
 - **Sub-agents**: Explore (codebase analysis), Task (build/test), Code Review, Plan
-- **Models**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
+- **Models**: Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ [SUPERSEDED by 2026-04-15 — deprecated 2026-03-26]
 - **January 2026 changelog**: Enhanced agents, context management, new install methods
 
 ### GitHub Copilot Workspace / Agent Mode (as of 2026-04-14)
@@ -105,6 +105,56 @@
 - AWF (Agent Workflow Firewall) restricts network egress
 - Safe Outputs subsystem handles write operations in separate permission-controlled jobs
 - Threat detection job runs per-workflow: prompt injection, credential leaks, malicious code
+
+## [2026-04-15] Daily Intelligence Update
+
+### 2026-04-15 -- version -- gh-aw CLI v0.68.3
+Released 2026-04-14. Model-not-supported detection, shared import `checkout`/`env` fields, TBT metric, OTEL token breakdowns, 5 push_signed_commits.cjs fixes.
+
+### 2026-04-15 -- version -- GitHub MCP Server v0.33.0/v0.33.1
+Released 2026-04-14. Granular PRs/issues toolsets, resolve review threads tool, `list_commits` `path`/`since`/`until` params, configurable server name.
+
+### 2026-04-15 -- deprecation -- Gemini 3 Pro deprecated
+Deprecated 2026-03-26 across all GitHub Copilot experiences. Use Gemini 3 Ultra.
+
+### 2026-04-15 -- feature -- Agent HQ and model selection
+Agent HQ: multi-vendor agents on GitHub. Model selection for Claude/Codex on github.com (2026-04-14).
+
+### 2026-04-15 -- feature -- Copilot data residency + FedRAMP
+US/EU data residency (2026-04-13). FedRAMP Moderate for US gov. `copilot --remote` public preview.
+
+### 2026-04-15 -- ecosystem -- GitHub Actions April changes
+Workflow reruns capped at 50 (2026-04-10). OIDC for Dependabot/code scanning. Code scanning→Issues linking. Async SBOM exports.
+
+---
+
+## [2026-04-16] Daily Intelligence Update
+
+### 2026-04-16 -- feature -- gh-aw v0.68.3 New Frontmatter Fields
+- **`pre-steps:`** — Runs custom steps at job start, **before checkout**. Use for token minting or pre-checkout setup. Outputs accessible via `${{ steps.<id>.outputs.<name> }}` for use in `checkout.github-token` to avoid masked-value cross-job boundary issues. Same security restrictions as `steps:`.
+- **`run-install-scripts:`** — Boolean (default: `false`). Allows npm pre/post install scripts. Default adds `--ignore-scripts` to all npm install commands (supply chain protection). Setting `true` disables globally; per-runtime scope via `runtimes.node.run-install-scripts`. Compile-time warning (strict mode: error).
+- **`on.stale-check:`** — Boolean nested under `on:`, default `true`. When `false`, disables the frontmatter hash check in the activation job. Required for cross-repo org ruleset deployments.
+- Source: PR #26607 in github/gh-aw ("Sync github-agentic-workflows.md with v0.68.3")
+
+### 2026-04-16 -- security -- gh-aw Security Fixes
+- **Steganographic injection**: PR #26596 strips markdown link title text to close injection channel
+- **XPIA @mentions**: PR #26589 sanitizes @mentions in `create_issue` body
+- **cache-memory sanitization**: PR #26587 adds pre-agent working-tree sanitization (neutralizes planted executables/disallowed files)
+- **Lock file integrity schema v4**: PR #26594 extends integrity check to detect post-compilation YAML tampering
+
+### 2026-04-16 -- version -- GitHub MCP Server v0.33.0/v0.33.1
+- **v0.33.0** (2026-04-14): Granular PRs/issues toolsets, `resolve_review_thread` tool, `list_commits` path/since/until params, configurable server name/title via translation strings, OSS HTTP logging adapter
+- **v0.33.1** (2026-04-14): Hotfix release
+
+### 2026-04-16 -- feature -- Claude Code Remote Tasks
+- **Remote Tasks** (launched March 20, 2026): Define GitHub repo + prompt + schedule → Claude runs autonomously on Anthropic cloud infrastructure. Supports cron scheduling.
+- **Remote Sessions**: Start task, close laptop, session continues on Anthropic infrastructure
+- **Open-sourced**: Agent layer at `anthropics/claude-code`
+- **v2.1.76** (March 14, 2026): Enhanced MCP elicitation support, improved tool discovery
+
+### 2026-04-16 -- feature -- Copilot Cloud Agent Per-Org Control
+- **Copilot cloud agent per-org control** (April 15, 2026): Can now be enabled for selected organizations via AI Controls page → "Agent" → "Copilot Cloud Agent"
+- **REST API version 2026-03-10**: Available with breaking changes to the REST API
 
 ---
 <!-- Append new entries above this line, newest first -->

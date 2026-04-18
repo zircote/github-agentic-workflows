@@ -64,7 +64,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **Plan mode:** Displays step-by-step plan before execution for review
 - **Background delegation:** Prefix prompt with `&` to delegate to cloud coding agent
 - **Specialized sub-agents:** Explore, Task, Code Review, Plan
-- **Model support:** Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, Gemini 3 Pro
+- **Model support:** Claude Opus 4.6, Claude Sonnet 4.6, GPT-5.3-Codex, ~~Gemini 3 Pro~~ (deprecated 2026-03-26)
 - Available to all paid Copilot subscribers (Pro, Business, Enterprise)
 
 ### GitHub Models API
@@ -83,10 +83,24 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
 - **MCP Gateway:** Centralized access management for MCP servers (**v0.2.24** as of 2026-04-18; runs as runner user with uid/gid Docker mapping since v0.2.x)
 
-### Claude Code
-- Anthropic's CLI agentic coding tool
-- Integrates with GitHub via MCP servers
-- Can run gh-aw workflows locally for testing
+## Claude Code (Anthropic)
+
+- Anthropic's CLI agentic coding tool, integrates with GitHub via MCP servers
+- Can serve as the AI engine in gh-aw workflows (alternative to Copilot CLI)
+- **Open-sourced** (2026): Agent layer at `anthropics/claude-code`
+- **Remote Tasks** (launched March 20, 2026): Define a GitHub repo + prompt + cron schedule → Claude runs autonomously on Anthropic's cloud infrastructure; cron scheduling supported
+- **Remote Sessions**: Start a task locally, close laptop; session continues on Anthropic infrastructure
+- Directly comparable to gh-aw scheduled workflows for Claude-engine use cases — a native Anthropic alternative that does not require GitHub Actions
+
+## Companion Projects
+
+| Project | Purpose |
+|---------|---------|
+| `gh-aw-actions` | Shared library of custom GitHub Actions for gh-aw workflows |
+| Agent Workflow Firewall (AWF) | Network egress control for agentic jobs |
+| MCP Gateway | Centralized MCP server access management |
+| `githubnext/agentics` | Sample pack of community gh-aw workflows |
+| `githubnext/awesome-continuous-ai` | Curated list of Continuous AI tools and frameworks |
 
 ## Ecosystem Integrations
 
