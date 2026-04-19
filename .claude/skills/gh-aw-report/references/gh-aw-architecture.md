@@ -9,7 +9,7 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **Install**: `gh extension install github/gh-aw`
 - **Purpose**: Compile markdown workflow definitions into GitHub Actions `.lock.yml` files
 - **Key commands**: `gh aw compile`, `gh aw validate`, `gh aw upgrade`, `gh aw mcp inspect`, `gh aw mcp list`
-- **AWF (Actions Workflow Framework)**: Default version **v0.25.24** (as of 2026-04-18)
+- **AWF (Actions Workflow Framework)**: Default version **v0.25.25** (as of 2026-04-19; v0.25.24 [SUPERSEDED])
 
 ### Workflow File Structure
 - **Source**: `.github/workflows/<name>.md` — markdown with YAML frontmatter
@@ -81,7 +81,9 @@ Stable architectural facts about the GitHub Agentic Workflows ecosystem. Used by
 - **`base_ref` parameter:** On Copilot PR tools for stacked PR / feature branch workflows
 - **Insiders mode:** Opt-in experimental features via `/insiders` URL or config header
 - **HTTP mode:** Enterprise deployment with per-request OAuth token forwarding
-- **MCP Gateway:** Centralized access management for MCP servers (**v0.2.24** as of 2026-04-18; runs as runner user with uid/gid Docker mapping since v0.2.x)
+- **MCP Gateway:** Centralized access management for MCP servers (**v0.2.25** as of 2026-04-19; v0.2.24 [SUPERSEDED])
+  - Runs as runner user with uid/gid Docker mapping since v0.2.x (fixes "Redact secrets in logs" warnings)
+  - **Port changed** from 80 → **8080** (non-privileged) in a prior PR; AWF `--allow-host-ports` added to whitelist port 8080
 
 ## Claude Code (Anthropic)
 

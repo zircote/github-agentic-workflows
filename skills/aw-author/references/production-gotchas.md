@@ -305,7 +305,29 @@ entrypointArgs:
   - "apk add --no-cache curl >/dev/null 2>&1 && exec my-server"
 ```
 
-### `gh aw mcp inspect/list` Limitation
+### MCP Gateway Port 8080 — AWF Firewall Blocks Traffic
+
+A gh-aw change moved the MCP gateway from port **80** to port **8080** (non-privileged). AWF's `--enable-host-access` only whitelists ports 80 and 443 by default. This leaves port 8080 blocked, causing silent failures.
+
+**Symptom:** MCP tools are completely unavailable to the agent AND safe-output calls silently time out — the agent appears to run but no tools work and writes never happen. Check `agent-artifacts/mcp-logs/` for connection refused errors on port 8080.
+
+**Affected versions:** gh-aw versions between the gateway port change (around AWF v0.25.20) and **v0.25.25** (which includes the `--allow-host-ports` fix).
+
+**Fix:** Update gh-aw to the latest version:
+
+```bash
+gh aw upgrade
+```
+
+This compiles `--allow-host-ports 80,443,8080` into the AWF command, allowing the agent to reach the MCP gateway.
+
+**Custom port:** If you use a custom `sandbox.mcp.port` configuration, the fix respects that value.
+
+**Root cause commit:** https://github.com/github/gh-aw/commit/a77850ea08d6b59e87b5ba41e78a1b5ee60b755d
+
+---
+
+
 
 The `gh aw mcp inspect` and `gh aw mcp list` commands do **NOT** follow `imports:` directives. They only see MCP servers declared in the direct frontmatter of the workflow file being inspected.
 
