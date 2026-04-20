@@ -6,6 +6,33 @@
 
 ---
 
+## [2026-04-20] Intelligence Update
+
+### 2026-04-20 — safe-outputs — update-pull-request `update-branch` parameter
+- **New parameter**: `update-branch: true` in `safe-outputs.update-pull-request` config block
+- **Behavior**: Calls `github.rest.pulls.updateBranch()` to sync PR branch with base before metadata updates
+- **Default**: `false` (opt-in)
+- **Source**: github/gh-aw PR #27244 (2026-04-20)
+
+### 2026-04-20 — safe-outputs — push-to-pull-request-branch `fallback-as-pull-request`
+- **New parameter**: `fallback-as-pull-request` boolean (default `true`)
+- **Behavior**: When target PR branch has diverged, creates a fallback PR rather than failing — **enabled by default**
+- **To disable**: `fallback-as-pull-request: false`
+- **Side effect**: `pull-requests: write` permission now requested by default for push-to-pull-request-branch
+- **Source**: github/gh-aw PR #27220 (2026-04-20)
+
+### 2026-04-20 — security — SEC-005 allowlist validation for workflow_dispatch
+- **Change**: `workflow_dispatch` target repo overrides now validated against SEC-005 allowlist
+- **Impact**: Cross-repo dispatch must be in `allowed-repos` or explicitly permitted
+- **Source**: github/gh-aw PR #27242 (2026-04-20)
+
+### 2026-04-20 — correction — push-to-pull-request-branch if-no-changes valid values
+- **Correct values**: `"warn"` (default), `"error"`, `"ignore"`
+- **Previously documented incorrectly as**: `"comment"`, `"skip"` — these are INVALID values
+- **Source**: github/gh-aw `pkg/workflow/push_to_pull_request_branch.go` switch statement
+
+---
+
 ## [2026-04-19] Daily Intelligence — AWF v0.25.25 / MCP Gateway v0.2.25 / Port 8080 Fix
 
 ### gh-aw Version Bumps (2026-04-19)
