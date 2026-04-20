@@ -427,7 +427,7 @@ This was a cosmetic/log-noise issue only — workflow functionality was not impa
 When using `dispatch-workflow` or `call-workflow` safe-outputs that include a `target-repo` override, gh-aw enforces **SEC-005 allowlist validation** (as of 2026-04-20, PR #27242).
 
 **What this means:**
-- The target repository must appear in `allowed-repos` on the dispatch/call-workflow safe-output config block, **or** the workflow must use `pull-request-repo` configuration to permit the target.
+- The target repository must appear in `allowed-repos` on the `dispatch-workflow` or `call-workflow` safe-output config block.
 - Workflows that hard-code a `target-repo` without a matching `allowed-repos` entry will now fail at runtime with a validation error.
 
 **How to fix:**

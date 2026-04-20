@@ -250,6 +250,7 @@ safe-outputs:
     body: true
     footer: true
     target: "triggering"
+    update-branch: false
     max: 1
 ```
 
@@ -311,7 +312,7 @@ safe-outputs:
 | `allowed-files` | list | — | Glob patterns forming a strict allowlist of files eligible for push |
 | `excluded-files` | list | — | Glob patterns for files to exclude via git pathspecs (stripped before commit) |
 | `patch-format` | string | `"am"` | Transport format: `"am"` (git format-patch) or `"bundle"` (git bundle, preserves merge topology) |
-| `fallback-as-pull-request` | boolean | `true` | Create fallback PR when push fails due to diverged/non-fast-forward branch; set `false` to disable |
+| `fallback-as-pull-request` | boolean | `true` | Create fallback PR when push fails due to diverged/non-fast-forward branch; because this defaults to `true`, `pull-requests: write` is requested by default; set `false` to disable |
 | `allow-workflows` | boolean | `false` | Add `workflows: write` to the App token (requires `safe-outputs.github-app`) |
 | `github-token-for-extra-empty-commit` | string | — | Token for empty commit to trigger CI (PAT or `"app"`) |
 | `max` | integer | `1` | Maximum pushes per run |
