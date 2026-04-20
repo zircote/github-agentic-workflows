@@ -250,6 +250,7 @@ safe-outputs:
     body: true
     footer: true
     target: "triggering"
+    update-branch: false
     max: 1
 ```
 
@@ -259,6 +260,7 @@ safe-outputs:
 | `body` | boolean | `true` | Enable body updates |
 | `footer` | boolean | `true` | Include AI footer |
 | `target` | string/int | `"triggering"` | Target PR |
+| `update-branch` | boolean | `false` | Sync PR branch with base branch before updating (calls `updateBranch` API) |
 | `max` | integer | `1` | Maximum updates per run |
 | `target-repo` | string | — | Cross-repo target |
 | `github-token` | string | — | Custom authentication token |
@@ -294,7 +296,7 @@ safe-outputs:
     title-prefix: "[fix]"
     labels: [automated]
     protected-files: fallback-to-issue
-    if-no-changes: "comment"
+    if-no-changes: "warn"
     max: 1
 ```
 
@@ -304,8 +306,18 @@ safe-outputs:
 | `title-prefix` | string | — | Require title prefix |
 | `labels` | list | — | Require all labels present |
 | `protected-files` | string | — | `"fallback-to-issue"` — protect certain files |
-| `if-no-changes` | string | — | Action when no changes: `"comment"`, `"skip"` |
+| `if-no-changes` | string | `"warn"` | Action when no changes: `"warn"` (default), `"error"`, `"ignore"` |
+| `ignore-missing-branch-failure` | boolean | `false` | Treat missing/deleted target branches as skipped instead of failures |
+| `commit-title-suffix` | string | — | Optional suffix to append to generated commit titles |
+| `allowed-files` | list | — | Glob patterns forming a strict allowlist of files eligible for push |
+| `excluded-files` | list | — | Glob patterns for files to exclude via git pathspecs (stripped before commit) |
+| `patch-format` | string | `"am"` | Transport format: `"am"` (git format-patch) or `"bundle"` (git bundle, preserves merge topology) |
+| `fallback-as-pull-request` | boolean | `true` | Create fallback PR when push fails due to diverged/non-fast-forward branch; because this defaults to `true`, `pull-requests: write` is requested by default; set `false` to disable |
+| `allow-workflows` | boolean | `false` | Add `workflows: write` to the App token (requires `safe-outputs.github-app`) |
+| `github-token-for-extra-empty-commit` | string | — | Token for empty commit to trigger CI (PAT or `"app"`) |
 | `max` | integer | `1` | Maximum pushes per run |
+| `target-repo` | string | — | Cross-repo target (`"owner/repo"`) |
+| `allowed-repos` | list | — | Additional allowed repositories |
 
 **Required permissions:** `pull-requests: write`, `contents: write`
 

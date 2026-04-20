@@ -417,3 +417,27 @@ If still seeing this warning:
 2. Verify MCP gateway is v0.2.24+ by checking workflow logs for the MCP gateway version line.
 
 This was a cosmetic/log-noise issue only — workflow functionality was not impacted.
+
+---
+
+## Cross-Repository Dispatch Security
+
+### SEC-005: `workflow_dispatch` Target Repo Overrides Must Pass Allowlist
+
+When using `dispatch-workflow` or `call-workflow` safe-outputs that include a `target-repo` override, gh-aw enforces **SEC-005 allowlist validation** (as of 2026-04-20, PR #27242).
+
+**What this means:**
+- The target repository must appear in `allowed-repos` on the `dispatch-workflow` or `call-workflow` safe-output config block.
+- Workflows that hard-code a `target-repo` without a matching `allowed-repos` entry will now fail at runtime with a validation error.
+
+**How to fix:**
+```yaml
+safe-outputs:
+  dispatch-workflow:
+    target-repo: owner/target-repo
+    allowed-repos:
+      - owner/target-repo   # Must be listed here for SEC-005 to pass
+    max: 1
+```
+
+**Source:** gh-aw PR #27242 (2026-04-20) — `invocation_context_helpers.cjs`
