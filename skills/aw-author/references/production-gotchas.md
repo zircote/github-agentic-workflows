@@ -319,15 +319,15 @@ A gh-aw change moved the MCP gateway from port **80** to port **8080** (non-priv
 gh aw upgrade
 ```
 
-This compiles `--allow-host-ports 80,443,8080` into the AWF command, allowing the agent to reach the MCP gateway.
+This compiles `--allow-host-ports 80,443,<gateway-port>` into the AWF command, allowing the agent to reach the MCP gateway. The default gateway port is `8080`.
 
 **Custom port:** If you use a custom `sandbox.mcp.port` configuration, the fix respects that value.
 
-**Root cause commit:** https://github.com/github/gh-aw/commit/a77850ea08d6b59e87b5ba41e78a1b5ee60b755d
+**Fix commit:** https://github.com/github/gh-aw/commit/a77850ea08d6b59e87b5ba41e78a1b5ee60b755d
 
 ---
 
-
+### `gh aw mcp inspect/list` Limitation
 
 The `gh aw mcp inspect` and `gh aw mcp list` commands do **NOT** follow `imports:` directives. They only see MCP servers declared in the direct frontmatter of the workflow file being inspected.
 

@@ -6,6 +6,30 @@
 
 ---
 
+## [2026-04-19] Daily Intelligence — AWF v0.25.25 / MCP Gateway v0.2.25 / Port 8080 Fix
+
+### gh-aw Version Bumps (2026-04-19)
+- **AWF (Actions Workflow Framework)**: v0.25.24 → **v0.25.25** (routine bump, PR #27102)
+- **MCP Gateway**: v0.2.24 → **v0.2.25** (routine bump, PR #27102)
+
+### Critical Bug Fix — MCP Gateway Port 8080 (2026-04-19)
+- **Symptom**: Silent MCP tool-call failures and safe-output timeouts
+- **Root cause**: PR #27058 moved MCP gateway from port 80 to port **8080** (non-privileged). AWF `--enable-host-access` only whitelists ports 80 and 443 by default, blocking gateway traffic on 8080.
+- **Fix**: Added `--allow-host-ports 80,443,<gateway-port>` to compiled AWF command, gated by minimum AWF version; respects custom `sandbox.mcp.port` config. Merged 2026-04-19 in PR #27080.
+- **Resolution**: Update to gh-aw v0.25.25+ (`gh aw upgrade`).
+- Source: https://github.com/github/gh-aw/commit/a77850ea08d6b59e87b5ba41e78a1b5ee60b755d
+
+### New copilot-opt Workflow (2026-04-19)
+- gh-aw internal workflow that analyzes 14-day session history and generates 3 evidence-backed Copilot optimization issues
+- Uses Haiku model + lean toolset + prompt compaction for token efficiency
+- Source: https://github.com/github/gh-aw/commit/1378d27a7efc20f30e8fedd484fab57beea7db26
+
+### Exported Constants (2026-04-19)
+- New constants exported from pkg: `guard-policy`, `BYOK`, AWF version string
+- Source: https://github.com/github/gh-aw/commit/c842421a058e688346db5491ce80e44179df6d01
+
+---
+
 ## [2026-04-18] Intelligence Update
 
 ### GitHub MCP Server
@@ -156,29 +180,4 @@ Workflow reruns capped at 50 (2026-04-10). OIDC for Dependabot/code scanning. Co
 - **Copilot cloud agent per-org control** (April 15, 2026): Can now be enabled for selected organizations via AI Controls page → "Agent" → "Copilot Cloud Agent"
 - **REST API version 2026-03-10**: Available with breaking changes to the REST API
 
----
-
-## [2026-04-19] Daily Intelligence — AWF v0.25.25 / MCP Gateway v0.2.25 / Port 8080 Fix
-
-### gh-aw Version Bumps (2026-04-19)
-- **AWF (Actions Workflow Framework)**: v0.25.24 → **v0.25.25** (routine bump, PR #27102)
-- **MCP Gateway**: v0.2.24 → **v0.2.25** (routine bump, PR #27102)
-
-### Critical Bug Fix — MCP Gateway Port 8080 (2026-04-19)
-- **Symptom**: Silent MCP tool-call failures and safe-output timeouts
-- **Root cause**: PR #27058 moved MCP gateway from port 80 to port **8080** (non-privileged). AWF `--enable-host-access` only whitelists ports 80 and 443 by default, blocking gateway traffic on 8080.
-- **Fix**: Added `--allow-host-ports 80,443,<gateway-port>` to compiled AWF command, gated by minimum AWF version; respects custom `sandbox.mcp.port` config. Merged 2026-04-19 in PR #27080.
-- **Resolution**: Update to gh-aw v0.25.25+ (`gh aw upgrade`).
-- Source: https://github.com/github/gh-aw/commit/a77850ea08d6b59e87b5ba41e78a1b5ee60b755d
-
-### New copilot-opt Workflow (2026-04-19)
-- gh-aw internal workflow that analyzes 14-day session history and generates 3 evidence-backed Copilot optimization issues
-- Uses Haiku model + lean toolset + prompt compaction for token efficiency
-- Source: https://github.com/github/gh-aw/commit/1378d27a7efc20f30e8fedd484fab57beea7db26
-
-### Exported Constants (2026-04-19)
-- New constants exported from pkg: `guard-policy`, `BYOK`, AWF version string
-- Source: https://github.com/github/gh-aw/commit/c842421a058e688346db5491ce80e44179df6d01
-
----
 <!-- Append new entries above this line, newest first -->
